@@ -23,10 +23,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'auth'
 ], function () {
-    Route::post('/register', [App\Http\Controllers\API\AuthController::class, 'register']);
-    Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->name('login');
-    Route::post('/update-user', [App\Http\Controllers\API\AuthController::class, 'updateProfile'])->name('update-profile');
-
+    Route::post('/register', [App\Http\Controllers\API\AuthController::class, 'register'])->middleware('authbasic');
+    Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->name('login')->middleware('authbasic');
+    Route::post('/update-user', [App\Http\Controllers\API\AuthController::class, 'updateProfile'])
+        ->name('update-profile')->middleware('authbasic');
+    Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
+        ->name('reset-password')->middleware('authbasic');
     Route::group([
         'middleware' => 'auth:api'
     ], function() {

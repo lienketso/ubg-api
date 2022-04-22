@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Repositories\CustomerRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -14,38 +15,70 @@ use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
+    protected $customerRepository;
+    public function __construct(CustomerRepository $customerRepository)
+    {
+        $this->customerRepository = $customerRepository;
+    }
 
     public function register(Request $request){
-        $validator = Validator::make($request->all(), [
-            'phone'=>'required|min:9|max:12|unique:ec_customers',
-            'password' => 'required|string|confirmed|min:6',
-        ]);
-        if($validator->fails()){
-            return response()->json($validator->errors());
+        if(is_numeric($request->username)){
+            $validator = Validator::make($request->all(), [
+                'username'=>'required|numeric|unique:ec_customers,phone',
+                'password' => 'required|string|confirmed|min:6',
+            ]);
+            if($validator->fails()){
+                return response()->json($validator->errors());
+            }
+            $customer = Customers::create([
+                'phone'=>$request->username,
+                'password'=>Hash::make($request->password),
+                'name'=>'User default',
+            ]);
+
+            }else if(filter_var($request->username, FILTER_VALIDATE_EMAIL)){
+            $validator = Validator::make($request->all(), [
+                'username'=>'required|email|unique:ec_customers,email',
+                'password' => 'required|string|confirmed|min:6',
+            ]);
+            if($validator->fails()){
+                return response()->json($validator->errors());
+            }
+            $customer = Customers::create([
+                'email'=>$request->username,
+                'password'=>Hash::make($request->password),
+                'name'=>'User default',
+            ]);
         }
-        $customer = Customers::create([
-           'phone'=>str_replace(' ','',$request->phone),
-            'password'=>Hash::make($request->password),
-            'name'=>'User default',
-            'email'=>'ubg-default@ubg.vn'
-        ]);
+
         $token = $customer->createToken('auth_token')->plainTextToken;
 
         return response()
             ->json(['data' => $customer,'access_token' => $token, 'token_type' => 'Bearer']);
     }
 
+    protected function credentials($username,$password)
+    {
+        if(is_numeric($username)){
+            return ['phone'=>$username,'password'=>$password];
+        }
+        elseif (filter_var($username, FILTER_VALIDATE_EMAIL)) {
+            return ['email' => $username, 'password'=>$password];
+        }
+        return ['phone' => $username, 'password'=>$password];
+    }
+
     public function login(Request $request){
         $validator = Validator::make($request->all(),[
-            'phone' => 'required',
+            'username' => 'required',
             'password' => 'required'
         ]);
         if($validator->fails()){
             return response()->json($validator->errors());
         }
 
-        $credentials = request(['phone', 'password']);
-
+//        $credentials = request(['phone', 'password']);
+        $credentials = $this->credentials($request->username,$request->password);
         if(!Auth::attempt($credentials)) {
             return response()->json([
                 'message' => 'Unauthorized'
@@ -64,7 +97,8 @@ class AuthController extends Controller
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
-            )->toDateTimeString()
+            )->toDateTimeString(),
+            'message'=>'Login success !'
         ]);
     }
 
@@ -84,6 +118,32 @@ class AuthController extends Controller
         $customer = Customers::find($request->id);
         $customer->update($request->all());
         return response()->json($customer);
+    }
+
+    public function ForgotPassword(Request $request){
+        $username = $request->username;
+        $validator = Validator::make($request->all(),[
+            'username' => 'required',
+            'password' => 'required|confirmed|string|min:6'
+        ]);
+        if($validator->fails()){
+            return response()->json($validator->errors());
+        }
+
+            $info = $this->customerRepository->scopeQuery(function ($e) use ($username){
+                return $e->where('phone',$username)->orWhere('email',$username);
+            })->first();
+
+            if($info){
+                $data = [
+                  'password'=>Hash::make($request->password)
+                ];
+                $this->customerRepository->update($data,$info->id);
+                return response()->json(['message'=>'Change password successful !']);
+            }else{
+                return response()->json(['error'=>'User not found !']);
+            }
+
     }
 
     public function LoginWithGoogle($driver,Request $request){

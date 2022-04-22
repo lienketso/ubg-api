@@ -9,9 +9,11 @@ use App\Repositories\AddressRepository;
 use App\Repositories\OrderAddressRepository;
 use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
+use App\Repositories\PaymentRepository;
 use App\Repositories\ProductRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
@@ -20,11 +22,13 @@ class OrderController extends Controller
     protected $orderAddressRepository;
     protected $productRepository;
     protected $orderProductRepository;
+    protected $paymentRepository;
     public function __construct(OrderRepository $orderRepository,
                                 AddressRepository $addressRepository,
                                 OrderAddressRepository $orderAddressRepository,
                                 ProductRepository $productRepository,
-                                OrderProductRepository $orderProductRepository
+                                OrderProductRepository $orderProductRepository,
+                                PaymentRepository $paymentRepository
     )
 
     {
@@ -33,6 +37,7 @@ class OrderController extends Controller
         $this->orderAddressRepository = $orderAddressRepository;
         $this->productRepository = $productRepository;
         $this->orderProductRepository = $orderProductRepository;
+        $this->paymentRepository = $paymentRepository;
     }
 
     public function getListOrder(Request $request){
@@ -59,6 +64,7 @@ class OrderController extends Controller
         return response()->json($order,200);
     }
 
+
     public function processInsertCart(Request $request){
         $currentUserId = $request->user()->id;
         if(!$currentUserId){
@@ -72,7 +78,7 @@ class OrderController extends Controller
             'shipping_option' => $request->input('shipping_option'),
             'shipping_amount' => 0,
             'tax_amount'      => 0,
-            'sub_total'       => $request->input('subtotal',0),
+            'sub_total'       => $request->input('sub_total',0),
             'coupon_code'     => $request->applied_coupon_code,
             'discount_amount' => 0,
             'status'          => 'pending',
@@ -151,6 +157,49 @@ class OrderController extends Controller
                 $this->orderProductRepository->create($data);
             }
             $sessionData['created_order_product'] = true;
+
+            //thanh toán
+            $paymentData = [
+                'customer_id'=>$currentUserId,
+                'error'=>false,
+                'message'=>false,
+                'amount'=>$order->amount,
+                'currency'=>'VND',
+                'type'=>$request->payment_method,
+                'charge_id'=>null,
+                'status'=>'pending',
+                'payment_channel'=>null
+            ];
+            if($request->get('vnp_ResponseCode') == '00'){
+                $paymentMethod = 'vnpay';
+            }else{
+                $paymentMethod = $request->payment_method;
+            }
+
+            switch ($paymentMethod){
+                case 'cod':
+                    $paymentData['charge_id'] = Str::upper(Str::random(10));
+                    $paymentData['payment_channel'] = $paymentMethod;
+                    $this->paymentRepository->create($paymentData);
+                    break;
+                case 'bank_transfer':
+                    $paymentData['charge_id'] = Str::upper(Str::random(10));
+                    $paymentData['payment_channel'] = $paymentMethod;
+                    $this->paymentRepository->create($paymentData);
+                    break;
+                case 'vnpay':
+                    $paymentData['charge_id'] = $order->id.'-'.now().'-VNP-'.Str::random(6);
+                    $paymentData['payment_channel'] = $paymentMethod;
+                    $this->paymentRepository->create($paymentData);
+                    break;
+                default:
+                    $paymentData['charge_id'] = Str::upper(Str::random(10));
+                    $paymentData['payment_channel'] = 'cod';
+                    $this->paymentRepository->create($paymentData);
+                    break;
+            }
+
+            //Trừ số lượng sản phẩm từ trong kho
 
             return response()->json($sessionData);
 
