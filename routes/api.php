@@ -23,8 +23,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'auth'
 ], function () {
-    Route::post('/register', [App\Http\Controllers\API\AuthController::class, 'register'])->middleware('authbasic');
-    Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])->name('login')->middleware('authbasic');
+    Route::post('/register', [App\Http\Controllers\API\AuthController::class, 'register'])
+        ->middleware('authbasic');
+    Route::post('/login', [App\Http\Controllers\API\AuthController::class, 'login'])
+        ->name('login')
+        ->middleware('authbasic');
     Route::post('/update-user', [App\Http\Controllers\API\AuthController::class, 'updateProfile'])
         ->name('update-profile')->middleware('authbasic');
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
@@ -34,8 +37,6 @@ Route::group([
     ], function() {
         Route::get('/logout', [\App\Http\Controllers\API\AuthController::class,'logout']);
         Route::get('/user', [\App\Http\Controllers\API\AuthController::class,'user']);
-        //add to card with auth
-        Route::post('/add-to-cart',[\App\Http\Controllers\API\CartController::class,'addToCart']);
         //insert order
         Route::post('/process-order-data',[\App\Http\Controllers\API\OrderController::class,'processInsertCart']);
 

@@ -183,7 +183,7 @@ class OrderController extends Controller
                     $this->paymentRepository->create($paymentData);
                     break;
                 case 'bank_transfer':
-                    $paymentData['charge_id'] = Str::upper(Str::random(10));
+                    $paymentData['charge_id'] = 'Bank-'.Str::upper(Str::random(10));
                     $paymentData['payment_channel'] = $paymentMethod;
                     $this->paymentRepository->create($paymentData);
                     break;
