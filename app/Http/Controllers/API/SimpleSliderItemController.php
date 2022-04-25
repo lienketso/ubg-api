@@ -8,6 +8,21 @@ use Illuminate\Http\Request;
 
 class SimpleSliderItemController extends Controller
 {
+    /**
+     * @SWG\Get(
+     *     path="/api/main-slider",
+     *     description="Get Main slider",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getMainSlider(Request $request){
         try{
             $slider = SimpleSliderItem::orderBy('order','asc')

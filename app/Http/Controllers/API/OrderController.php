@@ -14,6 +14,7 @@ use App\Repositories\ProductRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Swagger\Annotations as SWG;
 
 class OrderController extends Controller
 {
@@ -40,6 +41,35 @@ class OrderController extends Controller
         $this->paymentRepository = $paymentRepository;
     }
 
+    /**
+     * @SWG\Get(
+     *     path="/api/list-order",
+     *     description="Danh sách đơn hàng ",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         type="string",
+     *         description="ID custommer login",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="status",
+     *         in="query",
+     *         type="string",
+     *         description="pending, canceled, completed",
+     *         required=false,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getListOrder(Request $request){
 
         $q = Order::query();
@@ -56,7 +86,35 @@ class OrderController extends Controller
         }
 
     }
-
+    /**
+     * @SWG\Get(
+     *     path="/api/single-order",
+     *     description="Chi tiết đơn hàng",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="id",
+     *         in="query",
+     *         type="string",
+     *         description="ID đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="user_id",
+     *         in="query",
+     *         type="string",
+     *         description="Id customer Login",
+     *         required=false,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getSingleOrder(Request $request){
         $order = Order::where('id',$request->id)
             ->where('user_id',$request->user_id)
@@ -228,7 +286,30 @@ class OrderController extends Controller
         }
         return $this->orderAddressRepository->create($data);
     }
+
     // danh sách địa chỉ của khách hàng
+    /**
+     * @SWG\Get(
+     *     path="/api/address-list",
+     *     description="Danh sách địa chỉ khách hàng",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="customer_id",
+     *         in="query",
+     *         type="string",
+     *         description="ID custommer",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function listAddress(Request $request){
         try{
             $data = $this->addressRepository->findWhere(['customer_id'=>$request->customer_id])->all();

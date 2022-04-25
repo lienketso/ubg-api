@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Auth;
+use Swagger\Annotations as SWG;
 use Validator;
 use App\Models\Customers;
 use Laravel\Socialite\Facades\Socialite;
@@ -20,7 +21,42 @@ class AuthController extends Controller
     {
         $this->customerRepository = $customerRepository;
     }
-
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/register",
+     *     description="Login user, sử dụng basic authentication bằng tài khoản được cung cấp",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="username",
+     *         in="query",
+     *         type="string",
+     *         description="Username as phone or email address",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="password",
+     *     in="query",
+     *     type="string",
+     *     description="Input password",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="password_confirmation",
+     *     in="query",
+     *     type="string",
+     *     description="Confirm password",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function register(Request $request){
         if(is_numeric($request->username)){
             $validator = Validator::make($request->all(), [
@@ -67,7 +103,35 @@ class AuthController extends Controller
         }
         return ['phone' => $username, 'password'=>$password];
     }
-
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/login",
+     *     description="Login user, sử dụng basic authentication bằng tài khoản được cung cấp",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="username",
+     *         in="query",
+     *         type="string",
+     *         description="Username as phone or email address",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="password",
+     *     in="query",
+     *     type="string",
+     *     description="Input password",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function login(Request $request){
         $validator = Validator::make($request->all(),[
             'username' => 'required',
@@ -101,25 +165,135 @@ class AuthController extends Controller
             'message'=>'Login success !'
         ]);
     }
-
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/logout",
+     *     description="Logout user",
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function logout(Request $request){
         $request->user()->token()->revoke();
         return response()->json([
             'message' => 'Successfully logged out'
         ]);
     }
-
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/user",
+     *     description="Return a user's information",
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function user(Request $request)
     {
         return response()->json($request->user());
     }
-
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/update-user",
+     *     description="Update profile",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="id",
+     *         in="query",
+     *         type="string",
+     *         description="User id",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="name",
+     *     in="query",
+     *     type="string",
+     *     description="Input name want to change",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="email",
+     *     in="query",
+     *     type="string",
+     *     description="Input email want to change",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="phone",
+     *     in="query",
+     *     type="string",
+     *     description="Input phone want to change",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="dob",
+     *     in="query",
+     *     type="string",
+     *     description="Input date of birth want to change",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function updateProfile(Request $request){
         $customer = Customers::find($request->id);
         $customer->update($request->all());
         return response()->json($customer);
     }
-
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/reset-password",
+     *     description="Reset password",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="username",
+     *         in="query",
+     *         type="string",
+     *         description="Username as phone or email address",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="password",
+     *     in="query",
+     *     type="string",
+     *     description="Input password want to change",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function ForgotPassword(Request $request){
         $username = $request->username;
         $validator = Validator::make($request->all(),[

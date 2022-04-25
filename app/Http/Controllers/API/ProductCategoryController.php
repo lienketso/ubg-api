@@ -6,9 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Http\Request;
+use Swagger\Annotations as SWG;
 
 class ProductCategoryController extends Controller
 {
+    /**
+     * @SWG\Get(
+     *     path="/api/main-product-category",
+     *     description="Get list main category",
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getProductCategory(Request $request){
         try{
             $categories = ProductCategory::orderBy('order','asc')
@@ -22,7 +37,28 @@ class ProductCategoryController extends Controller
         }
 
     }
-
+    /**
+     * @SWG\Post(
+     *     path="/api/product-by-category",
+     *     description="Get list products by category",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="id",
+     *         in="query",
+     *         type="string",
+     *         description="input ID of category",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getProductByCategory(Request $request){
         $categories = ProductCategory::where('id',$request->id)
             ->with(['products'=>function($query) {

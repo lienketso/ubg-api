@@ -48,20 +48,20 @@ Route::get('/list-order',[\App\Http\Controllers\API\OrderController::class,'getL
 Route::get('/single-order',[\App\Http\Controllers\API\OrderController::class,'getSingleOrder'])->middleware('authbasic');
 
 //Store route
-Route::post('/list-locator', [App\Http\Controllers\API\StoreLocatorController::class, 'getListStore'])->middleware('authbasic');
+Route::get('/list-locator', [App\Http\Controllers\API\StoreLocatorController::class, 'getListStore'])->middleware('authbasic');
 //menu route
 /* main menu top */
-Route::post('/main-menu',[\App\Http\Controllers\API\MenuNodeController::class,'getMainMenu'])->middleware('authbasic');
+Route::get('/main-menu',[\App\Http\Controllers\API\MenuNodeController::class,'getMainMenu'])->middleware('authbasic');
 /* main category top */
-Route::post('/main-product-category',[\App\Http\Controllers\API\ProductCategoryController::class,'getProductCategory'])
+Route::get('/main-product-category',[\App\Http\Controllers\API\ProductCategoryController::class,'getProductCategory'])
     ->middleware('authbasic');
 //Slider route
-Route::post('/main-slider',[\App\Http\Controllers\API\SimpleSliderItemController::class,'getMainSlider'])
+Route::get('/main-slider',[\App\Http\Controllers\API\SimpleSliderItemController::class,'getMainSlider'])
     ->middleware('authbasic');
 
 //Route flash sale
 /* main flash sale home */
-Route::post('/flash-sale',[\App\Http\Controllers\API\FlashSaleController::class,'getFlashSale'])
+Route::get('/flash-sale',[\App\Http\Controllers\API\FlashSaleController::class,'getFlashSale'])
     ->middleware('authbasic');
 //route product
 /* get product by collection (Khuyến mại, discount, bán chạy) */
@@ -71,16 +71,16 @@ Route::post('/product-collection',[\App\Http\Controllers\API\ProductCollectionCo
 Route::post('product-by-category',[\App\Http\Controllers\API\ProductCategoryController::class,'getProductByCategory'])
     ->middleware('authbasic');
 /* get single product */
-Route::post('/single-product',[\App\Http\Controllers\API\ProductController::class,'getSingleProduct'])
+Route::get('/single-product',[\App\Http\Controllers\API\ProductController::class,'getSingleProduct'])
     ->middleware('authbasic');
 /* Sản phẩm liên quan */
-Route::post('/related-product',[\App\Http\Controllers\API\ProductController::class,'getRelatedProduct'])
+Route::get('/related-product',[\App\Http\Controllers\API\ProductController::class,'getRelatedProduct'])
     ->middleware('authbasic');
 /* Sản phẩm mua chung */
 Route::get('/group-product-list',[\App\Http\Controllers\API\GroupByProductController::class,'getMuachungList'])
     ->middleware('authbasic');
 /* Chi tiết Sản phẩm mua chung */
-Route::post('/group-product-single',[\App\Http\Controllers\API\GroupByProductController::class,'getMuachungSingle'])
+Route::get('/group-product-single',[\App\Http\Controllers\API\GroupByProductController::class,'getMuachungSingle'])
     ->middleware('authbasic');
 
 //route cart

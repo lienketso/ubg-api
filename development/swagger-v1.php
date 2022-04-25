@@ -10,7 +10,7 @@
  *         description="Getting started with Laravel and Swagger",
  *         termsOfService="",
  *         @SWG\Contact(
- *             email="name@example.com"
+ *             email="thanhan1507@gmail.com"
  *         ),
  *     ),
  * )
