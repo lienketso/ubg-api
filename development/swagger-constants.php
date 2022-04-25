@@ -1,2 +1,2 @@
 <?php
-define("API_HOST", 'api-ubg.test');
+define("API_HOST", 'https://api.ubgmart.com');
