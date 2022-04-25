@@ -2,14 +2,14 @@
     "swagger": "2.0",
     "info": {
         "title": "Laravel and Swagger",
-        "description": "base url image https://ubgmart.com/storage/",
+        "description": "base url image https://ubgmart.com/storage/ , s\u1eed d\u1ee5ng basic auth theo t\u00e0i kho\u1ea3n \u0111\u01b0\u1ee3c cung c\u1ea5p \u0111\u1ec3 truy c\u1eadp api",
         "termsOfService": "",
         "contact": {
             "email": "thanhan1507@gmail.com"
         },
         "version": "1.0.0"
     },
-    "host": "api-ubg.test",
+    "host": "https://api.ubgmart.com",
     "basePath": "/",
     "schemes": [
         "http"
