@@ -9,10 +9,10 @@
         },
         "version": "1.0.0"
     },
-    "host": "https://api.ubgmart.com",
+    "host": "api.ubgmart.com",
     "basePath": "/",
     "schemes": [
-        "http"
+        "https"
     ],
     "paths": {
         "/api/auth/register": {
