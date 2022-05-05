@@ -85,7 +85,31 @@ Route::get('/group-product-single',[\App\Http\Controllers\API\GroupByProductCont
 
 //route cart
 
-Route::post('/list-item-cart',[\App\Http\Controllers\API\CartController::class,'getCartList'])->middleware('authbasic');
+Route::post('/list-item-cart',[\App\Http\Controllers\API\CartController::class,'getCartList'])
+    ->middleware('authbasic');
 
 //danh sách địa chỉ khách hàng
-Route::get('/address-list',[\App\Http\Controllers\API\OrderController::class,'listAddress'])->middleware('authbasic');
+Route::get('/address-list',[\App\Http\Controllers\API\OrderController::class,'listAddress'])
+    ->middleware('authbasic');
+
+//chi tiết mã coupon khuyến mại
+Route::get('/get-coupon-code',[\App\Http\Controllers\API\OrderController::class,'getDiscountByCode'])
+    ->middleware('authbasic');
+//chi tiết promotion
+Route::get('/get-promotion-in-cart-value',[\App\Http\Controllers\API\OrderController::class,'getPromotionValue'])
+    ->middleware('authbasic');
+
+//route location
+/* Tỉnh thành */
+Route::get('get-province',[\App\Http\Controllers\API\LocationController::class,'getProvince'])
+    ->middleware('authbasic');
+/* Quan huyen */
+Route::get('get-districts',[\App\Http\Controllers\API\LocationController::class,'getDistrictByProvince'])
+    ->middleware('authbasic');
+/* Phường xã */
+Route::get('get-wards',[\App\Http\Controllers\API\LocationController::class,'getWardByDistrict'])
+    ->middleware('authbasic');
+
+//route get fee ship
+Route::get('get-fee-shipping',[\App\Http\Controllers\API\OrderController::class,'getFeeShipping'])
+    ->middleware('authbasic');

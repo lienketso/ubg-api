@@ -11,6 +11,8 @@ class SimpleSliderItemController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/main-slider",
+     *     summary="Main slider",
+     *     tags={"Slider"},
      *     description="Get Main slider",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Response(

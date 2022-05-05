@@ -14,6 +14,8 @@ class GroupByProductController extends Controller
      * @SWG\Get(
      *     path="/api/group-product-list",
      *     description="Sản phẩm mua chung",
+     *     summary="Danh sách sản phẩm mua chung",
+     *     tags={"Products"},
      *     security = { { "basicAuth": {} } },
      *     @SWG\Response(
      *         response=200,
@@ -36,6 +38,8 @@ class GroupByProductController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/group-product-single",
+     *     summary="Chi tiết sản phẩm mua chung",
+     *     tags={"Products"},
      *     description="Chi tiết sản phẩm mua chung",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(

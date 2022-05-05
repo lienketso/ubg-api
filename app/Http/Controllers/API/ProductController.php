@@ -12,6 +12,8 @@ class ProductController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/single-product",
+     *     summary="Chi tiết sản phẩm",
+     *     tags={"Products"},
      *     description="Chi tiết sản phẩm",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -46,6 +48,8 @@ class ProductController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/related-product",
+     *     summary="Sản phẩm liên quan",
+     *     tags={"Products"},
      *     description="Sản phẩm liên quan",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(

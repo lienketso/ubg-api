@@ -11,6 +11,7 @@ class FlashSaleController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/flash-sale",
+     *     summary="Danh sách sản phẩm flash sale",
      *     description="Get flash sale",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Response(

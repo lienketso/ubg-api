@@ -12,7 +12,9 @@ class ProductCollectionController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/product-collection",
-     *     description="Sản phẩm khuyến mại, discoun, bán chạy...",
+     *     summary="Danh sách sản phẩm khuyến mại, bán chạy...",
+     *     tags={"Products"},
+     *     description="Sản phẩm khuyến mại, discount, bán chạy...",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
      *         name="id",

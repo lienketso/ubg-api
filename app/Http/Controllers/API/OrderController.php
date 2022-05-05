@@ -5,12 +5,16 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderAddress;
+use App\Models\StoreLocator;
 use App\Repositories\AddressRepository;
+use App\Repositories\DiscountRepository;
 use App\Repositories\OrderAddressRepository;
 use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\UsersRepository;
+use App\Traits\BestExpressConnection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -24,12 +28,17 @@ class OrderController extends Controller
     protected $productRepository;
     protected $orderProductRepository;
     protected $paymentRepository;
+    protected $discountRepository;
+    protected $usersRepository;
+
     public function __construct(OrderRepository $orderRepository,
                                 AddressRepository $addressRepository,
                                 OrderAddressRepository $orderAddressRepository,
                                 ProductRepository $productRepository,
                                 OrderProductRepository $orderProductRepository,
-                                PaymentRepository $paymentRepository
+                                PaymentRepository $paymentRepository,
+                                DiscountRepository $discountRepository,
+                                UsersRepository $usersRepository
     )
 
     {
@@ -39,11 +48,15 @@ class OrderController extends Controller
         $this->productRepository = $productRepository;
         $this->orderProductRepository = $orderProductRepository;
         $this->paymentRepository = $paymentRepository;
+        $this->discountRepository = $discountRepository;
+        $this->usersRepository = $usersRepository;
     }
 
     /**
      * @SWG\Get(
      *     path="/api/list-order",
+     *     summary="Lấy ra danh sách đơn hàng",
+     *     tags={"Order"},
      *     description="Danh sách đơn hàng ",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -89,6 +102,8 @@ class OrderController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/single-order",
+     *     summary="Thông tin chi tiết đơn hàng",
+     *     tags={"Order"},
      *     description="Chi tiết đơn hàng",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -145,6 +160,22 @@ class OrderController extends Controller
         $order = Order::create($request->input());
         $sessionData['created_order'] = true;
         $sessionData['created_order_id'] = $order->id;
+        //trừ đi mã discount
+        $code = $request->applied_coupon_code;
+        $discount = $this->discountRepository->scopeQuery(function($q) use($code){
+            return $q->where('code',$code)
+                ->where('type','coupon')
+                ->where('start_date','<=',now())
+                ->where(function($query){
+                    return $query->whereNull('end_date')
+                        ->orWhere('end_date','>',now());
+                });
+        })->first();
+
+        if (!empty($discount)) {
+            $discount->total_used++;
+            $this->discountRepository->updateOrCreate($discount);
+        }
         //lấy ra address từ id
         $address_id = $request->address_id;
         $sessionData['address_id'] = $address_id;
@@ -201,6 +232,7 @@ class OrderController extends Controller
                     }
                 }
             }
+            $weight = $weight < 0.1 ? 0.1 : $weight;
             foreach ($cartData as $d) {
                 $data = [
                     'order_id' => $order->id,
@@ -291,7 +323,9 @@ class OrderController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/address-list",
-     *     description="Danh sách địa chỉ khách hàng",
+     *     summary="Danh sách địa chỉ của user",
+     *     tags={"Order"},
+     *     description="Danh sách địa chỉ của user, hiển thị trong lựa chọn đơn hàng",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
      *         name="customer_id",
@@ -319,5 +353,272 @@ class OrderController extends Controller
         }
 
     }
+
+    //get discount by coupon
+    /**
+     * @SWG\Get(
+     *     path="/api/get-coupon-code",
+     *     summary="Lấy ra thông tin giảm giá từ mã coupon",
+     *     tags={"Promotion & Discount"},
+     *     description="Mã coupon",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="applied_coupon_code",
+     *         in="query",
+     *         type="string",
+     *         description="Mã coupon",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getDiscountByCode(Request $request){
+        $code = $request->applied_coupon_code;
+        $discount = $this->discountRepository->scopeQuery(function($q) use($code){
+            return $q->where('code',$code)
+                ->where('type','coupon')
+                ->where('start_date','<=',now())
+                ->where(function($query){
+                    return $query->whereNull('end_date')
+                        ->orWhere('end_date','>',now());
+                });
+        })->first();
+        return response()->json($discount);
+    }
+
+    //Get promotion
+    //get discount by coupon
+    /**
+     * @SWG\Get(
+     *     path="/api/get-promotion-in-cart-value",
+     *     summary="Lấy ra số tiền nếu có chương trình promotion",
+     *     description="Promotion trừ tiền trong đơn hàng, sử dụng để trừ đi tổng số tiền đơn hàng",
+     *     tags={"Promotion & Discount"},
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="cart_items",
+     *         in="query",
+     *         type="string",
+     *         description="danh sách đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="raw_total",
+     *     in="query",
+     *     type="string",
+     *     description="Tổng tiền đơn hàng",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="total_qty",
+     *     in="query",
+     *     type="string",
+     *     description="Tổng số lượng sản phẩm",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getPromotionValue(Request $request){
+        $cartItems = $request->cart_items; //giỏ hàng
+        $promotionDiscountAmount = 0;
+        $rawTotal = $request->raw_total; // Tổng tiền
+        $countCart = $request->total_qty; //Tổng số lượng sản phẩm
+        $promotions = $this->discountRepository->scopeQuery(function($q){
+            return $q->where('type','promotion')
+                ->where('start_date','<=',now())
+                ->where(function ($query){
+                    return $query->whereNull('end_date')->orWhere('end_date','>',now());
+                });
+        })->all();
+
+        if(!empty($promotions)){
+            foreach($promotions as $promotion){
+                switch ($promotion->type_option){
+                    case 'amount' :
+                        switch ($promotion->target){
+                            case 'amount-minimum-order':
+                                if($promotion->min_order_price <= $rawTotal){
+                                    $promotionDiscountAmount += $promotion->value;
+                                }
+                                break;
+                            case 'all-orders':
+                                $promotionDiscountAmount += $promotion->value;
+                                break;
+                            default:
+                                if ($countCart >= $promotion->product_quantity) {
+                                    $promotionDiscountAmount += $promotion->value;
+                                }
+                                break;
+                        }
+                        break;
+                    case 'percentage':
+                        switch ($promotion->target){
+                            case 'amount-minimum-order':
+                                if ($promotion->min_order_price <= $rawTotal) {
+                                    $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
+                                }
+                                break;
+                            case 'all-orders':
+                                $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
+                                break;
+                            default:
+                                if ($countCart >= $promotion->product_quantity) {
+                                    $promotionDiscountAmount += $rawTotal * $promotion->value / 100;
+                                }
+                                break;
+                        }
+                        break;
+                    case 'same-price':
+                        if ($promotion->product_quantity > 1 && $countCart >= $promotion->product_quantity) {
+                            $cartItems = json_decode($cartItems);
+                            foreach ($cartItems as $item) {
+                                if ($item->qty >= $promotion->product_quantity) {
+                                    if (in_array($promotion->target, ['specific-product', 'product-variant']) &&
+                                        in_array($item->id, $promotion->products()->pluck('product_id')->all())
+                                    ) {
+                                        $promotionDiscountAmount += ($item->price - $promotion->value) * $item->qty;
+                                    } elseif ($product = $this->productRepository->findById($item->id)) {
+                                        $productCollections = $product
+                                            ->productCollections()
+                                            ->pluck('ec_product_collections.id')->all();
+
+                                        $discountProductCollections = $promotion
+                                            ->productCollections()
+                                            ->pluck('ec_product_collections.id')
+                                            ->all();
+
+                                        if (!empty(array_intersect($productCollections,
+                                            $discountProductCollections))) {
+                                            $promotionDiscountAmount += ($item->price - $promotion->value) * $item->qty;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        return $promotionDiscountAmount;
+    }
+    /**
+     * @SWG\Get(
+     *     path="/api/get-fee-shipping",
+     *     summary="Lấy ra phí ship",
+     *     description="Phí ship đơn hàng",
+     *     tags={"Shipping"},
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="store_location",
+     *         in="query",
+     *         type="string",
+     *         description="ID của store locator mặc định khi vào app",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="customer_id",
+     *     in="query",
+     *     type="string",
+     *     description="ID của khách hàng",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="order_total",
+     *     in="query",
+     *     type="string",
+     *     description="Tổng tiền đơn hàng",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="weight",
+     *     in="query",
+     *     type="string",
+     *     description="Tổng trọng lượng",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="city",
+     *     in="query",
+     *     type="string",
+     *     description="Tên tỉnh thành",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="state",
+     *     in="query",
+     *     type="string",
+     *     description="Tên quận huyện",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getFeeShipping(Request $request){
+
+        $storeLocatorSelected = $request->store_location;
+        $storeLocator = new StoreLocator();
+        if($storeLocatorSelected == null){
+            $customer = $this->usersRepository->find($request->customer_id);
+            if(!empty($customer)) {
+                if ($customer->store_locator_id != null) {
+                    $defaultStore = $storeLocator->find($customer->store_locator_id);
+                } else {
+                    $defaultStore = $storeLocator->where('is_primary', 1)
+                        ->where('is_shipping_location', 1)
+                        ->first();
+                }
+            }else{
+                $defaultStore = $storeLocator->where('is_primary', 1)
+                    ->where('is_shipping_location', 1)
+                    ->first();
+            }
+        }else {
+            $defaultStore = $storeLocator->find($storeLocatorSelected);
+        }
+
+        $shippingData = [
+            'ProductPrice' => $request->order_total,
+            'COD' => 0,
+            'ServiceId' => 12491,
+            "DestCity"  =>  $request->city,
+            "DestDistrict"  => $request->state,
+            "SourceCity" => $defaultStore['city'],
+            "SourceDistrict" => $defaultStore['state'],
+            "Weight" => $request->weight,
+        ];
+        $bestExpressShippingFee = BestExpressConnection::calculateShippingPrice($shippingData);
+        $result['bestexpress'] = [
+                'name'  => 'BestExpress',
+                'price' => $bestExpressShippingFee['TotalFeeVATWithDiscount']
+        ];
+
+        return response()->json($result);
+
+
+    }
+
 
 }

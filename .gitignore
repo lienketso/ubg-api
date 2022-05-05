@@ -12,3 +12,5 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+development/swagger-constants.php
+development/swagger-v1.php

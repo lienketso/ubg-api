@@ -11,6 +11,8 @@ class MenuNodeController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/main-menu",
+     *     summary="Menu chính",
+     *     tags={"Menu"},
      *     description="Get list main menu",
      *     @SWG\Response(
      *         response=200,

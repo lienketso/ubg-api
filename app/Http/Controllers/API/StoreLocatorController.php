@@ -12,6 +12,7 @@ class StoreLocatorController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/list-locator",
+     *     summary="Danh sách kho hàng",
      *     description="List danh sách tất cả các địa điểm kho",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Response(

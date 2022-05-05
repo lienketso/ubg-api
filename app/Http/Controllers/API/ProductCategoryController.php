@@ -13,6 +13,8 @@ class ProductCategoryController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/main-product-category",
+     *     summary="Danh sách danh mục sản phẩm",
+     *     tags={"Products"},
      *     description="Get list main category",
      *     @SWG\Response(
      *         response=200,
@@ -40,6 +42,8 @@ class ProductCategoryController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/product-by-category",
+     *     summary="Danh sách sản phẩm theo danh mục",
+     *     tags={"Products"},
      *     description="Get list products by category",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(

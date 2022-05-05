@@ -24,6 +24,8 @@ class AuthController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/auth/register",
+     *     summary="Đăng ký thành viên",
+     *     tags={"Users"},
      *     description="Login user, sử dụng basic authentication bằng tài khoản được cung cấp",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -106,6 +108,8 @@ class AuthController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/auth/login",
+     *     summary="Đăng nhập",
+     *     tags={"Users"},
      *     description="Login user, sử dụng basic authentication bằng tài khoản được cung cấp",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -168,6 +172,8 @@ class AuthController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/auth/logout",
+     *     summary="Đăng xuất",
+     *     tags={"Users"},
      *     description="Logout user",
      *     @SWG\Response(
      *         response=200,
@@ -188,6 +194,8 @@ class AuthController extends Controller
     /**
      * @SWG\Get(
      *     path="/api/auth/user",
+     *     summary="Lấy thông tin user",
+     *     tags={"Users"},
      *     description="Return a user's information",
      *     @SWG\Parameter(
      *         name="Authorization",
@@ -213,6 +221,8 @@ class AuthController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/auth/update-user",
+     *     summary="Cập nhật thông tin user",
+     *     tags={"Users"},
      *     description="Update profile",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
@@ -268,6 +278,8 @@ class AuthController extends Controller
     /**
      * @SWG\Post(
      *     path="/api/auth/reset-password",
+     *     summary="Đổi mật khẩu",
+     *     tags={"Users"},
      *     description="Reset password",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
