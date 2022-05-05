@@ -55,7 +55,7 @@ class BestExpressConnection
 
             $rawData = [
                 'UserName' => self::$username,
-                'ProductPrice' => $data['ProductPrice'],
+                'ProductPrice' => floatval($data['ProductPrice']),
                 'COD' => $data['COD'],
                 'ServiceId' => 12491,
                 "DestCity"  => $data['DestCity'],
@@ -64,6 +64,7 @@ class BestExpressConnection
                 "SourceDistrict" => $data['SourceDistrict'],
                 "Weight" => intval($package['Weight']),
             ];
+
 
             if ($package['Length'] != 0) {
                 $rawData['Length'] = $package['Length'];
@@ -89,6 +90,7 @@ class BestExpressConnection
         } catch (\Exception $e) {
             return ['TotalFeeVATWithDiscount' => 0];
         }
+
     }
 
 

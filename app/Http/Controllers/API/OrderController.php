@@ -185,6 +185,10 @@ class OrderController extends Controller
                         'name'=>$request->name,
                         'phone'=>$request->phone,
                         'address'=>$request->address,
+                        'city'=>$request->city,
+                        'state'=>$request->state,
+                        'ward'=>$request->ward,
+                        'country'=>'VN',
                         'customer_id'=>$currentUserId
                     ];
                     $rule = [
