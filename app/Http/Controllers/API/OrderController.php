@@ -409,7 +409,7 @@ class OrderController extends Controller
      *     @SWG\Parameter(
      *         name="cart_items",
      *         in="query",
-     *         type="string",
+     *         type="json",
      *         description="danh sách đơn hàng",
      *         required=true,
      *     ),
