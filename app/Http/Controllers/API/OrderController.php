@@ -137,7 +137,114 @@ class OrderController extends Controller
         return response()->json($order,200);
     }
 
-
+    /**
+     * @SWG\Post(
+     *     path="/api/process-order-data",
+     *     summary="Xử lý check out đơn hàng",
+     *     tags={"Order"},
+     *     description="Insert đơn hàng vào data, xử lý đơn hàng",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="amount",
+     *         in="query",
+     *         type="double",
+     *         description="Tổng tiền đơn hàng sau khi đã cộng trừ các phí, mã",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="sub_total",
+     *         in="query",
+     *         type="double",
+     *         description="Tổng tiền đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="shipping_option",
+     *         in="query",
+     *         type="string",
+     *         description="Default bestexpress",
+     *         required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="coupon_code",
+     *         in="query",
+     *         type="string",
+     *         description="Default null",
+     *         required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="address_id",
+     *         in="query",
+     *         type="string",
+     *         description="Nếu value là 'new' thì thêm mới địa chỉ",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="name",
+     *         in="query",
+     *         type="string",
+     *         description="Tên khách hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="phone",
+     *         in="query",
+     *         type="string",
+     *         description="Số điện thoại",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="address",
+     *         in="query",
+     *         type="string",
+     *         description="Địa chỉ chi tiết",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="city",
+     *         in="query",
+     *         type="string",
+     *         description="Tên tỉnh thành",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="state",
+     *         in="query",
+     *         type="string",
+     *         description="Tên quận huyện",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="ward",
+     *         in="query",
+     *         type="string",
+     *         description="Tên xã phường",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="payment_method",
+     *         in="query",
+     *         type="string",
+     *         description="Phương thức thanh toán : cod, bank_transfer, vnpay",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="data",
+     *         in="query",
+     *         type="json",
+     *         description="Thông tin đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function processInsertCart(Request $request){
         $currentUserId = $request->user()->id;
         if(!$currentUserId){

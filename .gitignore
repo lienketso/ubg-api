@@ -14,3 +14,4 @@ yarn-error.log
 /.vscode
 development/swagger-constants.php
 development/swagger-v1.php
+public/swagger/swagger.json
