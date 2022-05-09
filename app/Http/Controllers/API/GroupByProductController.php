@@ -46,7 +46,7 @@ class GroupByProductController extends Controller
      *         name="id",
      *         in="query",
      *         type="string",
-     *         description="ID sản phẩm",
+     *         description="ID sản phẩm mua chung",
      *         required=true,
      *     ),
      *     @SWG\Response(
@@ -64,6 +64,13 @@ class GroupByProductController extends Controller
             ->with('getProduct')
             ->with('getOrders')
             ->first();
-        return response()->json($product);
+        $single = $product['getProduct'];
+        $single['type'] = 'muachung';
+        return response()->json($single);
     }
+
+    public function getSingleProductByMuachung(Request $request){
+
+    }
+
 }
