@@ -15,7 +15,9 @@ use App\Repositories\PaymentRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\UsersRepository;
 use App\Traits\BestExpressConnection;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Swagger\Annotations as SWG;
@@ -166,6 +168,27 @@ class OrderController extends Controller
      *         required=false,
      *     ),
      *     @SWG\Parameter(
+     *         name="shipping_amount",
+     *         in="query",
+     *         type="string",
+     *         description="Tiền ship",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="discount_amount",
+     *         in="query",
+     *         type="string",
+     *         description="Tiền khuyến mại",
+     *         required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="ubg_xu_checkout",
+     *         in="query",
+     *         type="string",
+     *         description="on, off tuỳ chọn sử dụng xu",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
      *         name="coupon_code",
      *         in="query",
      *         type="string",
@@ -250,27 +273,86 @@ class OrderController extends Controller
         if(!$currentUserId){
             $currentUserId = 0;
         }
+        $orderAmount = $request->amount;
+        $rawTotal = $request->sub_total;
+        $shippingAmount = $request->shipping_amount;
+        $couponCode = $request->coupon_code;
+        $discountAmount = $request->discount_amount;
+        $paidWithUbgXu = $request->get('ubg_xu_checkout') == 'on';
+        $paidUbgXuAmount = 0;
+
+        if ($paidWithUbgXu) {
+            $ubgxu = $request->user()->ubgxu;
+            if ($ubgxu >= $orderAmount) {
+                $orderAmount -= $rawTotal;
+                $paidUbgXuAmount = $rawTotal;
+            } else {
+                $orderAmount -= $ubgxu;
+                $paidUbgXuAmount = $ubgxu;
+            }
+        }
+
+        //check ctv
+        $affiliateId = 0;
+        if ($request->user()) {
+            $affiliateId = $request->user()->presenter_id;
+        }
+
         $request->merge([
-            'amount'          => $request->amount,
+            'amount'          => $orderAmount,
             'currency_id'     => 3,
             'user_id'         => $currentUserId,
             'shipping_method' => $request->input('shipping_method', 'default'),
             'shipping_option' => $request->input('shipping_option'),
-            'shipping_amount' => 0,
+            'shipping_amount' => (float)$shippingAmount,
             'tax_amount'      => 0,
             'sub_total'       => $request->input('sub_total',0),
-            'coupon_code'     => $request->applied_coupon_code,
-            'discount_amount' => 0,
+            'coupon_code'     => $couponCode,
+            'discount_amount' => $discountAmount,
             'status'          => 'pending',
             'is_finished'     => false,
+            'affliate_user_id' => $affiliateId,
+            'paid_by_ubgxu'  => $paidUbgXuAmount
         ]);
         $order = Order::create($request->input());
         $sessionData['created_order'] = true;
         $sessionData['created_order_id'] = $order->id;
+        //Trừ xu trong tài khoản
+        if ($paidWithUbgXu) {
+            DB::beginTransaction();
+            try{
+                //Trừ xu
+                DB::table('ec_customers')
+                    ->where('id', $currentUserId)
+                    ->decrement('ubgxu', $paidUbgXuAmount);
+                //Ghi log giao dịch xu
+                DB::table('ubgxu_pay_log')->insert([
+                    'content' => 'Bạn vừa sử dụng '.number_format($paidUbgXuAmount).' xu cho việc thanh toán đơn hàng số '.$order->id,
+                    'customer_id' => $currentUserId,
+                    'created_at' => Carbon::now()
+                ]);
+                //Tạo giao dịch xu
+                DB::table('ubgxu_transaction')->insert([
+                    'customer_id' => $currentUserId,
+                    'amount' => $paidUbgXuAmount,
+                    'description' => 'Bạn vừa sử dụng '.number_format($paidUbgXuAmount).' xu cho việc thanh toán đơn hàng số '.$order->id,
+                    'transaction_type' => 'decrease',
+                    'transaction_source' => 'https://ubgmart.com',
+                    'total_day_refund' => 0,
+                    'rest_cashback_amount' => 0,
+                    'compare_code' => $order->id,
+                    'created_at' => Carbon::now(),
+                    'status' => 'completed'
+                ]);
+            }catch (\Exception $e){
+                DB::rollBack();
+            }
+            DB::commit();
+        }
+
         //trừ đi mã discount
-        $code = $request->applied_coupon_code;
-        $discount = $this->discountRepository->scopeQuery(function($q) use($code){
-            return $q->where('code',$code)
+        $discount = $this->discountRepository->scopeQuery(function($q) use($couponCode){
+            return $q->where('code',$couponCode )
                 ->where('type','coupon')
                 ->where('start_date','<=',now())
                 ->where(function($query){
@@ -361,6 +443,7 @@ class OrderController extends Controller
 
             //thanh toán
             $paymentData = [
+                'order_id'=>$order->id,
                 'customer_id'=>$currentUserId,
                 'error'=>false,
                 'message'=>false,
@@ -731,5 +814,56 @@ class OrderController extends Controller
 
     }
 
+    //payment vnpay status
+    public function vnPayStatus(Request $request){
+        $payment = $this->paymentRepository
+            ->findWhere(['order_id'=>$request->order_id])
+            ->first();
+        if($request->vnp_ResponseCode=='00'){
+            $payment->status = 'completed';
+        }else{
+            $payment->status = 'failed';
+        }
+        $payment->save();
+        return response()->json(['message'=>'200']);
+    }
+
+    //get ubgxu with user login
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/get-ubgxu-by-user",
+     *     summary="Lấy ra số xu khả dụng của user",
+     *     description="Phí ship đơn hàng",
+     *     tags={"Order"},
+     *     security = { { "Bearer Token": {} } },
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getUbgXu(Request $request){
+        $user = $request->user();
+        if($user && !empty($user)){
+            $ubgxu = intval($user->ubgxu);
+            return response()->json(['ubgxu'=>$ubgxu]);
+        }else{
+            return response()->json(['error'=>'Không tồn tại người dùng']);
+        }
+
+    }
+
+    //xử lý xu
 
 }

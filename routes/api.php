@@ -39,6 +39,8 @@ Route::group([
         Route::get('/user', [\App\Http\Controllers\API\AuthController::class,'user']);
         //insert order
         Route::post('/process-order-data',[\App\Http\Controllers\API\OrderController::class,'processInsertCart']);
+        //route ubgxu
+        Route::get('get-ubgxu-by-user',[\App\Http\Controllers\API\OrderController::class,'getUbgXu']);
 
     });
 });
@@ -116,3 +118,9 @@ Route::get('get-wards',[\App\Http\Controllers\API\LocationController::class,'get
 //route get fee ship
 Route::get('get-fee-shipping',[\App\Http\Controllers\API\OrderController::class,'getFeeShipping'])
     ->middleware('authbasic');
+
+//route payment
+Route::get('get-vnpay-status',[\App\Http\Controllers\API\OrderController::class,'vnPayStatus'])
+    ->middleware('authbasic');
+
+
