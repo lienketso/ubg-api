@@ -53,6 +53,13 @@ class ProductCategoryController extends Controller
      *         description="input ID of category",
      *         required=true,
      *     ),
+     *      @SWG\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         type="string",
+     *         description="Limit sản phẩm",
+     *         required=true,
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="OK",
@@ -64,12 +71,15 @@ class ProductCategoryController extends Controller
      * )
      */
     public function getProductByCategory(Request $request){
+        $limit = $request->limit;
         $categories = ProductCategory::where('id',$request->id)
-            ->with(['products'=>function($query) {
+            ->with(['products'=>function($query) use($limit) {
                 return $query->where('ec_products.status','published')
-                    ->paginate(10);
+                    ->get(['ec_products.id','ec_products.name','ec_products.price','ec_products.sale_price','ec_products.images'])
+                    ->take($limit);
             }])
             ->first();
+        $categories['base_url'] ='https://ubgmart.com/storage/';
 //        $allProducts = $categories->products->merge($categories->subproducts);
         return response()->json($categories);
     }

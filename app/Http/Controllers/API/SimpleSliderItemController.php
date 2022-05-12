@@ -15,6 +15,13 @@ class SimpleSliderItemController extends Controller
      *     tags={"Slider"},
      *     description="Get Main slider",
      *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *      name="slide_id",
+     *      in="query",
+     *      type="string",
+     *      description="Loại slider ( main slider value 9 )",
+     *      required=true
+     *      ),
      *     @SWG\Response(
      *         response=200,
      *         description="OK",
@@ -26,10 +33,12 @@ class SimpleSliderItemController extends Controller
      * )
      */
     public function getMainSlider(Request $request){
+        $id = $request->slide_id;
         try{
             $slider = SimpleSliderItem::orderBy('order','asc')
-                ->where('simple_slider_id','=',1)
+                ->where('simple_slider_id','=',$id)
                 ->get(['id','title','image','link','order']);
+            $slider['base_url'] = 'https://ubgmart.com/storage/';
             return response()->json($slider);
         }catch (\Exception $e){
             return response()->json($e->getMessage());

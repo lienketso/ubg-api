@@ -49,8 +49,9 @@ class ProductCollectionController extends Controller
                 ->with(['products'=>function($query) use($limit){
                     return $query->where('status','published')
                         ->take($limit)
-                        ->get(['name','price']);
+                        ->get(['ec_products.id','ec_products.name','ec_products.price','ec_products.sale_price','ec_products.images']);
                 }])->get(['id','name','description','status']);
+            $collection['base_url'] = 'https://ubgmart.com/storage/';
             return response()->json($collection);
         }else{
             return response()->json(['message'=>'Param id not found !']);
