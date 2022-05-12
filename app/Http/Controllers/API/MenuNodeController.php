@@ -25,7 +25,8 @@ class MenuNodeController extends Controller
      * )
      */
     public function getMainMenu(Request $request){
-        $menu = MenuNode::where('menu_id','=',1)->where('parent_id','=',0)
+        $id = $request->id;
+        $menu = MenuNode::where('menu_id','=',$id)->where('parent_id','=',0)
             ->with('childs')->get(['id','parent_id','title','url','has_child']);
         return response()->json($menu);
     }
