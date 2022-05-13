@@ -38,7 +38,6 @@ class SimpleSliderItemController extends Controller
             $slider = SimpleSliderItem::orderBy('order','asc')
                 ->where('simple_slider_id','=',$id)
                 ->get(['id','title','image','link','order']);
-            $slider['base_url'] = 'https://ubgmart.com/storage/';
             return response()->json($slider);
         }catch (\Exception $e){
             return response()->json($e->getMessage());
