@@ -126,4 +126,10 @@ Route::get('get-fee-shipping',[\App\Http\Controllers\API\OrderController::class,
 Route::get('get-vnpay-status',[\App\Http\Controllers\API\OrderController::class,'vnPayStatus'])
     ->middleware('authbasic');
 
+//route blog
+Route::get('get-discount-blog-by-category',[\App\Http\Controllers\API\CategoryController::class,'getDisCountPost'])
+    ->middleware('authbasic');
+Route::get('get-single-post',[\App\Http\Controllers\API\CategoryController::class,'getSinglePost'])
+    ->middleware('authbasic');
+
 
