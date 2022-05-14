@@ -815,6 +815,44 @@ class OrderController extends Controller
     }
 
     //payment vnpay status
+    /**
+     * @SWG\Get(
+     *     path="/api/get-vnpay-status",
+     *     summary="Vnpay response",
+     *     description="Trạng thái thanh toán qua vnpay",
+     *     tags={"Payment"},
+     *     security = { { "Bearer Token": {} } },
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="created_order_id",
+     *         in="header",
+     *         type="string",
+     *         description="Id đơn hàng đã tạo khi create order",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="vnp_ResponseCode",
+     *         in="header",
+     *         type="string",
+     *         description="Mã vnpay trả về",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function vnPayStatus(Request $request){
         $payment = $this->paymentRepository
             ->findWhere(['order_id'=>$request->order_id])

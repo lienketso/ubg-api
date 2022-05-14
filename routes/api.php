@@ -84,6 +84,9 @@ Route::get('/group-product-list',[\App\Http\Controllers\API\GroupByProductContro
 /* Chi tiết Sản phẩm mua chung */
 Route::get('/group-product-single',[\App\Http\Controllers\API\GroupByProductController::class,'getMuachungSingle'])
     ->middleware('authbasic');
+/* Chi tiết Sản phẩm mua chung */
+Route::get('/group-product-related',[\App\Http\Controllers\API\GroupByProductController::class,'getRelateMuaChung'])
+    ->middleware('authbasic');
 /* Tìm kiếm sản phẩm */
 Route::get('/search-product',[\App\Http\Controllers\API\ProductController::class,'searchProduct'])
     ->middleware('authbasic');

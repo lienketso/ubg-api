@@ -68,9 +68,46 @@ class GroupByProductController extends Controller
         $single['type'] = 'muachung';
         return response()->json($single);
     }
-
-    public function getSingleProductByMuachung(Request $request){
-
+    /**
+     * @SWG\Get(
+     *     path="/api/group-product-related",
+     *     summary="sản phẩm mua chung khác",
+     *     tags={"Products"},
+     *     description="Danh sách sản phẩm mua chung khác",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="group_id",
+     *         in="query",
+     *         type="string",
+     *         description="ID sản phẩm mua chung single",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="limit",
+     *         in="query",
+     *         type="string",
+     *         description="Số sản phẩm cần lấy",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getRelateMuaChung(Request $request){
+        $group_id = $request->group_id;
+        $limit = $request->limit;
+        $product = GroupBuyProduct::with('getProduct')
+            ->where('id','!=',$group_id)
+            ->where('start_date','<=',Carbon::now())
+            ->where('end_date','>=',Carbon::now())
+            ->paginate($limit);
+        return response()->json($product);
     }
 
 }
