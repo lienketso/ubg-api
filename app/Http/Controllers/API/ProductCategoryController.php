@@ -75,7 +75,7 @@ class ProductCategoryController extends Controller
         $categories = ProductCategory::where('id',$request->id)
             ->with(['products'=>function($query) use($limit) {
                 return $query->where('ec_products.status','published')
-                    ->get(['ec_products.id','ec_products.name','ec_products.price','ec_products.sale_price','ec_products.images'])
+                    ->get()
                     ->take($limit);
             }])
             ->first();
