@@ -68,13 +68,6 @@ class OrderController extends Controller
      *         description="ID custommer login",
      *         required=true,
      *     ),
-     *     @SWG\Parameter(
-     *         name="status",
-     *         in="query",
-     *         type="string",
-     *         description="pending, canceled, completed",
-     *         required=false,
-     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="OK",
@@ -88,20 +81,26 @@ class OrderController extends Controller
     public function getListOrder(Request $request){
 
         $q = Order::query();
-        $product = [];
         try{
-            if($request->status){
-                $q = $q->where('status',$request->status);
+            if(!is_null($request->status) && $request->status){
+                $q->where('status',$request->status);
             }
+            $ss = [];
             $orders = $q->orderBy('created_at','desc')
                 ->where('user_id','=',$request->user_id)
                 ->with('products')
                 ->paginate(10);
             foreach($orders as $d){
-                $product = $d->products[0];
-                $singleProduct = $this->productRepository->find($product->product_id);
-                $d['image'] = $singleProduct->images;
+                if($d->products){
+                    $product = $d->products;
+                    foreach($product as $p){
+                        $singleProduct = $this->productRepository->find($p->product_id);
+                        $ss = $singleProduct;
+                    }
+                }
+                $d['image'] = $ss->images;
             }
+
 
             return response()->json($orders);
         }catch (\Exception $e){
