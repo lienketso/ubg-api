@@ -20,4 +20,10 @@ class OrderProduct extends Model
         'options',
         'restock_quantity',
     ];
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class)->withDefault();
+    }
+
 }

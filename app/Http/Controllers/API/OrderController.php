@@ -85,23 +85,18 @@ class OrderController extends Controller
             if(!is_null($request->status) && $request->status){
                 $q->where('status',$request->status);
             }
-            $ss = [];
+            $product = [];
             $orders = $q->orderBy('created_at','desc')
                 ->where('user_id','=',$request->user_id)
                 ->with('products')
                 ->paginate(10);
             foreach($orders as $d){
-                if($d->products){
-                    $product = $d->products;
-                    foreach($product as $p){
-                        $singleProduct = $this->productRepository->find($p->product_id);
-                        $ss = $singleProduct;
-                    }
+                $product = $d->products;
+                foreach ($product as $p){
+                    $single = $this->productRepository->find($p->product_id);
+                    $p['image'] = $single->images;
                 }
-                $d['image'] = $ss->images;
             }
-
-
             return response()->json($orders);
         }catch (\Exception $e){
             return $e->getMessage();
