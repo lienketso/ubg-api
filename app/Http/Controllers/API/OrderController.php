@@ -88,13 +88,21 @@ class OrderController extends Controller
     public function getListOrder(Request $request){
 
         $q = Order::query();
+        $product = [];
         try{
             if($request->status){
                 $q = $q->where('status',$request->status);
             }
             $orders = $q->orderBy('created_at','desc')
                 ->where('user_id','=',$request->user_id)
+                ->with('products')
                 ->paginate(10);
+            foreach($orders as $d){
+                $product = $d->products[0];
+                $singleProduct = $this->productRepository->find($product->product_id);
+                $d['image'] = $singleProduct->images;
+            }
+
             return response()->json($orders);
         }catch (\Exception $e){
             return $e->getMessage();
