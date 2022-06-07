@@ -132,4 +132,6 @@ Route::get('get-discount-blog-by-category',[\App\Http\Controllers\API\CategoryCo
 Route::get('get-single-post',[\App\Http\Controllers\API\CategoryController::class,'getSinglePost'])
     ->middleware('authbasic');
 
+Route::get('get-ubgxu-exchange',[\App\Http\Controllers\API\SettingController::class,'getSettingUbg'])
+    ->middleware('authbasic');
 
