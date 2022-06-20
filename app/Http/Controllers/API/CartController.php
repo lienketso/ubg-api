@@ -59,7 +59,4 @@ class CartController extends Controller
         return response()->json($cartItems);
     }
 
-
-
-
 }

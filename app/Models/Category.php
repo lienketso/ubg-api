@@ -25,18 +25,7 @@ class Category extends Model
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'description',
-        'parent_id',
-        'icon',
-        'is_featured',
-        'order',
-        'is_default',
-        'status',
-        'author_id',
-        'author_type',
-    ];
+    protected $guarded = [];
 
     public function posts(): BelongsToMany
     {

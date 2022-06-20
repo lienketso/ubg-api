@@ -3,7 +3,6 @@
 
 namespace App\Repositories;
 
-
 use App\Models\Setting;
 use Prettus\Repository\Eloquent\BaseRepository;
 
