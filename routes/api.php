@@ -41,7 +41,7 @@ Route::group([
         Route::post('/process-order-data',[\App\Http\Controllers\API\OrderController::class,'processInsertCart']);
         //route ubgxu
         Route::get('get-ubgxu-by-user',[\App\Http\Controllers\API\OrderController::class,'getUbgXu']);
-
+        Route::get('/get-presenter-by-me',[\App\Http\Controllers\API\AuthController::class,'getPresenterByAuth']);
     });
 });
 /* danh sách đơn hàng của khách hàng */

@@ -347,5 +347,47 @@ class AuthController extends Controller
                 auth()->login($newUser, true);
             }
     }
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/get-presenter-by-me",
+     *     summary="Lấy thông tin khách hàng của cộng tác viên",
+     *     tags={"Users"},
+     *     description="Danh sách khách hàng của cộng tác viên đang đăng nhập",
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getPresenterByAuth(Request $request){
+
+        if(!$request->user()){
+            return response()->json(['error'=>'Authentication fail']);
+        }
+        try{
+            $currentUserId = $request->user()->id;
+            $listPresenter = $this->customerRepository->getModel()
+                ->where('is_verified',1)
+                ->whereNull('is_affiliater')
+                ->where('presenter_id',$currentUserId)
+                ->get();
+            return response()->json($listPresenter);
+        }catch (\Exception $e){
+            return $e->getMessage();
+        }
+
+
+    }
 
 }
