@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductCategory;
 use App\Repositories\SettingRepository;
 use Illuminate\Http\Request;
+use Swagger\Annotations as SWG;
 
 class SettingController extends Controller
 {
@@ -22,6 +23,23 @@ class SettingController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * @SWG\Get(
+     *     path="/api/get-ubgxu-exchange",
+     *     summary="Thông tin cấu hình ubg xu",
+     *     tags={"Settings"},
+     *     description="Thông tin cấu hình ubg xu",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getSettingUbg()
     {
         $ubg_exchange_vn = $this->settingRepository->getModel()->where('key','ubg_exchange_vnd')->first();
@@ -36,6 +54,23 @@ class SettingController extends Controller
     /**
      * @return \Illuminate\Http\JsonResponse
      */
+    /**
+     * @SWG\Get(
+     *     path="/api/settings",
+     *     summary="Thông tin cấu hình danh mục sản phẩm",
+     *     tags={"Settings"},
+     *     description="Thông tin cấu hình danh mục sản phẩm",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
     public function getGlobalSetting()
     {
         $featuredCategories = ProductCategory::with(['products' => function($q) {
@@ -43,7 +78,7 @@ class SettingController extends Controller
         }])->where('is_featured', 1)->where('status', 'published')->get();
 
         $settings = [
-            'featured_caegories' => $featuredCategories
+            'featured_categories' => $featuredCategories
         ];
 
         return response()->json($settings);
