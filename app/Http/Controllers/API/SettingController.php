@@ -75,7 +75,7 @@ class SettingController extends Controller
     {
         $featuredCategories = ProductCategory::with(['products' => function($q) {
             return $q->where('status', 'published')->take(6);
-        }])->where('is_featured', 1)->where('status', 'published')->get();
+        }])->whereIn('id', [76,77,91,92,94])->where('status', 'published')->get();
 
         $settings = [
             'featured_categories' => $featuredCategories
