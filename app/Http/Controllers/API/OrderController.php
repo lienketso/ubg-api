@@ -588,6 +588,32 @@ class OrderController extends Controller
         })->first();
         return response()->json($discount);
     }
+    //get coupon code
+    /**
+     * @SWG\Get(
+     *     path="/api/get-list-coupon-code",
+     *     summary="Danh sách mã giảm giá",
+     *     tags={"Promotion & Discount"},
+     *     description="Danh sách Mã coupon",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getAllDiscountCode(Request $request){
+        $listDiscount = $this->discountRepository->getModel()
+            ->where('type','coupon')
+            ->where('start_date','<=',now())
+            ->whereNull('end_date')
+            ->orWhere('end_date','>',now())->get();
+        return response()->json($listDiscount);
+    }
 
     //Get promotion
     //get discount by coupon

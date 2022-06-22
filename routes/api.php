@@ -102,6 +102,9 @@ Route::get('/address-list',[\App\Http\Controllers\API\OrderController::class,'li
 //chi tiết mã coupon khuyến mại
 Route::get('/get-coupon-code',[\App\Http\Controllers\API\OrderController::class,'getDiscountByCode'])
     ->middleware('authbasic');
+//Danh sách mã khuyến mại
+Route::get('/get-list-coupon-code',[\App\Http\Controllers\API\OrderController::class,'getAllDiscountCode'])
+    ->middleware('authbasic');
 //chi tiết promotion
 Route::get('/get-promotion-in-cart-value',[\App\Http\Controllers\API\OrderController::class,'getPromotionValue'])
     ->middleware('authbasic');
