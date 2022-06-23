@@ -936,6 +936,64 @@ class OrderController extends Controller
         }
     }
 
-    //xử lý xu
+    //danh sach don hang ap dung ubgxu
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/get-order-paid-by-ubgxu",
+     *     summary="Danh sách đơn hàng áp dụng ubgxu",
+     *     description="Xác thực Bearer Token",
+     *     tags={"Order"},
+     *     security = { { "Bearer Token": {} } },
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="status",
+     *         in="header",
+     *         type="string",
+     *         description="Theo trạng thái ( pending: Chưa xử lý, canceled : đã huỷ, processing: đang xử lý, completed: đã hoàn thành )",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getListOrderPaidByXu(Request $request){
+        $status = $request->status;
+        try{
+            $user = $request->user();
+            if($user && !empty($user)){
+                $listOrder = $this->orderRepository->getModel()
+                    ->where('user_id',$user->id)
+                    ->where('paid_by_ubgxu','>',0)
+                    ->where('status',$status)
+                    ->with(['products'])
+                    ->get();
+
+                foreach($listOrder as $key => $d){
+                    $products = $d->products[0];
+                    $infoProduct = $this->productRepository->find($products->product_id);
+                    $listOrder[$key]['product_name'] = $products->product_name;
+                    $listOrder[$key]['product_price'] = $products->price;
+                    $listOrder[$key]['image'] = $infoProduct->images;
+                }
+
+                return response()->json($listOrder);
+        }
+
+        }catch (\Exception $e){
+            return response()->json(['error'=>'authentication fail','exception'=>$e->getMessage()]);
+        }
+    }
 
 }

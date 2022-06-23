@@ -38,6 +38,8 @@ Route::group([
         Route::get('/user', [\App\Http\Controllers\API\AuthController::class,'user']);
         //insert order
         Route::post('/process-order-data',[\App\Http\Controllers\API\OrderController::class,'processInsertCart']);
+        //Danh sach don hang ap dung ubgxu
+        Route::get('/get-order-paid-by-ubgxu',[\App\Http\Controllers\API\OrderController::class,'getListOrderPaidByXu']);
         //route ubgxu
         Route::get('get-ubgxu-by-user',[\App\Http\Controllers\API\OrderController::class,'getUbgXu']);
         Route::get('/get-presenter-by-me',[\App\Http\Controllers\API\AuthController::class,'getPresenterByAuth']);
