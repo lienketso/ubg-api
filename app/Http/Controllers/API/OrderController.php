@@ -68,6 +68,13 @@ class OrderController extends Controller
      *         description="ID custommer login",
      *         required=true,
      *     ),
+     *     @SWG\Parameter(
+     *         name="status",
+     *         in="query",
+     *         type="string",
+     *         description="Trạng thái đơn hàng : canceled : Huỷ , pending: Chưa xử lý, processing: Đang xử lý, completed: Đã hoàn thành",
+     *         required=false,
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="OK",
@@ -594,7 +601,7 @@ class OrderController extends Controller
      *     path="/api/get-list-coupon-code",
      *     summary="Danh sách mã giảm giá",
      *     tags={"Promotion & Discount"},
-     *     description="Danh sách Mã coupon",
+     *     description="Mô tả - code : mã áp dụng khuyến mãi khi người dùng nhập từ input, start_date : Ngày bắt đầu áp dụng mã khuyến mãi, end_date : Ngày hiết hiệu lực (null thì vô hạn), quantity : số lượng mã khuyến mại, total_used: Tổng số mã đã được áp dụng, value: giá trị khuyến mại, type_option : Kiểu giá trị giảm giá ( percentage : giảm theo %, amount : giảm tiền, shipping : free ship, same-price : đồng giá ), type: Kiểu mã (coupon : theo mã khuyến mại, promotion : Chương trình khuyến mại ),target: Áp dụng khuyến mại cho ( all-orders : Tất cả đơn hàng, amount-minimum-order: tiền đơn hàng từ, group-products: Mua chung, specific-product: Áp dụng cho sản phẩm, customer : Áp dụng cho khách hàng, product-variant: sản phẩm có biến thể)",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Response(
      *         response=200,
