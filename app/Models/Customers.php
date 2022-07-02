@@ -18,7 +18,8 @@ class Customers extends Model
         'email',
         'password',
         'avatar',
-        'dob'
+        'dob',
+        'register_resource'
     ];
     protected $hidden = [
         'password',

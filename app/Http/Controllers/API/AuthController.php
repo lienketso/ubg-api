@@ -49,6 +49,13 @@ class AuthController extends Controller
      *     description="Confirm password",
      *     required=true,
      *     ),
+     *     @SWG\Parameter(
+     *     name="affiliation_id",
+     *     in="query",
+     *     type="string",
+     *     description="Options nếu có mã giới thiệu",
+     *     required=false,
+     *     ),
      *     @SWG\Response(
      *         response=200,
      *         description="OK",
@@ -72,6 +79,7 @@ class AuthController extends Controller
                 'phone'=>$request->username,
                 'password'=>Hash::make($request->password),
                 'name'=>'User default',
+                'register_resource'=>'app'
             ]);
 
             }else if(filter_var($request->username, FILTER_VALIDATE_EMAIL)){
@@ -86,7 +94,15 @@ class AuthController extends Controller
                 'email'=>$request->username,
                 'password'=>Hash::make($request->password),
                 'name'=>'User default',
+                'register_resource'=>'app'
             ]);
+            //nếu có mã giới thiệu
+            if($request->input('affiliation_id') != null){
+                $presenterUser = $this->customerRepository->findWhere(['affiliation_id'=>$request->input('affiliation_id')])->first();
+                $customer->presenter_id = $presenterUser->id;
+                $this->customerRepository->updateOrCreate($customer);
+            }
+
         }
 
         $token = $customer->createToken('auth_token')->plainTextToken;
