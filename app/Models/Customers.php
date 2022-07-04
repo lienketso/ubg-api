@@ -19,7 +19,10 @@ class Customers extends Model
         'password',
         'avatar',
         'dob',
-        'register_resource'
+        'register_resource',
+        'ubgxu',
+        'presenter_id',
+        'affiliation_id'
     ];
     protected $hidden = [
         'password',

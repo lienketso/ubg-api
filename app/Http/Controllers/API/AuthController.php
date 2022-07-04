@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Models\SettingRegister;
 use App\Models\User;
 use App\Repositories\CustomerRepository;
+use App\Repositories\SettingRegisterRepository;
+use App\Repositories\UbgxuPaylogRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -17,9 +20,16 @@ use Laravel\Socialite\Facades\Socialite;
 class AuthController extends Controller
 {
     protected $customerRepository;
-    public function __construct(CustomerRepository $customerRepository)
+    protected $ubgxuPaylogRepository;
+    protected $settingRegisterRepository;
+    public function __construct(
+        CustomerRepository $customerRepository,
+        UbgxuPaylogRepository $ubgxuPaylogRepository,
+        SettingRegisterRepository $settingRegisterRepository
+    )
     {
         $this->customerRepository = $customerRepository;
+        $this->ubgxuPaylogRepository = $ubgxuPaylogRepository;
     }
     /**
      * @SWG\Post(
@@ -67,6 +77,10 @@ class AuthController extends Controller
      * )
      */
     public function register(Request $request){
+        $settingRegister = SettingRegister::where('type','app')
+            ->where('expire_date','>=',now()->toDateString())
+            ->where('start_date','>=',now()->toDateString())
+            ->first();
         if(is_numeric($request->username)){
             $validator = Validator::make($request->all(), [
                 'username'=>'required|numeric|unique:ec_customers,phone',
@@ -96,14 +110,27 @@ class AuthController extends Controller
                 'name'=>'User default',
                 'register_resource'=>'app'
             ]);
-            //nếu có mã giới thiệu
-            if($request->input('affiliation_id') != null){
-                $presenterUser = $this->customerRepository->findWhere(['affiliation_id'=>$request->input('affiliation_id')])->first();
-                $customer->presenter_id = $presenterUser->id;
-                $this->customerRepository->updateOrCreate($customer);
-            }
-
         }
+        //nếu có chương trình tặng xu
+        if($settingRegister && $settingRegister!=null){
+            $upxu = ['ubgxu'=>$settingRegister->total_plus_ubgxu];
+            $this->customerRepository->update($upxu,$customer->id);
+            //lưu lịch sử cộng xu khi đăng ký qua app
+            $data = [
+                'content'=>'Bạn được cộng '. $settingRegister->total_plus_ubgxu. ' xu từ chương trình đăng ký qua App',
+                'comeback'=>$settingRegister->total_plus_ubgxu,
+                'customer_id'=>$customer->id
+            ];
+            $this->ubgxuPaylogRepository->create($data);
+        }
+
+        //nếu có mã giới thiệu
+        if($request->input('affiliation_id') != null){
+            $presenterUser = $this->customerRepository->findWhere(['affiliation_id'=>$request->input('affiliation_id')])->first();
+            $aff = ['presenter_id'=>$presenterUser->id];
+            $this->customerRepository->update($aff,$customer->id);
+        }
+
 
         $token = $customer->createToken('auth_token')->plainTextToken;
 
