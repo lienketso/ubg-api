@@ -145,6 +145,13 @@ class OrderController extends Controller
         $order = Order::where('id',$request->id)
             ->where('user_id',$request->user_id)
             ->with(['products','address'])->first();
+        foreach ($order->products as $p){
+            $single = $this->productRepository->find($p->product_id);
+            if($single && $single!=null){
+                $p['image'] = $single->images;
+            }
+
+        }
         return response()->json($order,200);
     }
 
