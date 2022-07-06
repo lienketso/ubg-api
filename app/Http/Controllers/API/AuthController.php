@@ -77,10 +77,10 @@ class AuthController extends Controller
      * )
      */
     public function register(Request $request){
-        $settingRegister = SettingRegister::where('type','app')
-            ->where('expire_date','>=',now()->toDateString())
-            ->where('start_date','>=',now()->toDateString())
-            ->first();
+//        $settingRegister = SettingRegister::where('type','app')
+//            ->where('expire_date','>=',now()->toDateString())
+//            ->where('start_date','>=',now()->toDateString())
+//            ->first();
         if(is_numeric($request->username)){
             $validator = Validator::make($request->all(), [
                 'username'=>'required|numeric|unique:ec_customers,phone',
@@ -112,17 +112,17 @@ class AuthController extends Controller
             ]);
         }
         //nếu có chương trình tặng xu
-        if($settingRegister && $settingRegister!=null){
-            $upxu = ['ubgxu'=>$settingRegister->total_plus_ubgxu];
-            $this->customerRepository->update($upxu,$customer->id);
-            //lưu lịch sử cộng xu khi đăng ký qua app
-            $data = [
-                'content'=>'Bạn được cộng '. $settingRegister->total_plus_ubgxu. ' xu từ chương trình đăng ký qua App',
-                'comeback'=>$settingRegister->total_plus_ubgxu,
-                'customer_id'=>$customer->id
-            ];
-            $this->ubgxuPaylogRepository->create($data);
-        }
+//        if($settingRegister && $settingRegister!=null){
+//            $upxu = ['ubgxu'=>$settingRegister->total_plus_ubgxu];
+//            $this->customerRepository->update($upxu,$customer->id);
+//            //lưu lịch sử cộng xu khi đăng ký qua app
+//            $data = [
+//                'content'=>'Bạn được cộng '. $settingRegister->total_plus_ubgxu. ' xu từ chương trình đăng ký qua App',
+//                'comeback'=>$settingRegister->total_plus_ubgxu,
+//                'customer_id'=>$customer->id
+//            ];
+//            $this->ubgxuPaylogRepository->create($data);
+//        }
 
         //nếu có mã giới thiệu
         if($request->input('affiliation_id') != null){
