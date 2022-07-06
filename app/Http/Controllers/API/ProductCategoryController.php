@@ -80,7 +80,12 @@ class ProductCategoryController extends Controller
             }])
             ->first();
         $categories['base_url'] ='https://ubgmart.com/storage/';
-//        $allProducts = $categories->products->merge($categories->subproducts);
+
+            $product = $categories->products;
+            foreach($product as $p){
+                $p['stores_info'] = $p->stores;
+            }
+
         return response()->json($categories);
     }
 

@@ -42,7 +42,7 @@ class ProductController extends Controller
      */
     public function getSingleProduct(Request $request){
         $id = $request->id;
-        $single = Product::where('id',$id)->first();
+        $single = Product::with('stores')->where('id',$id)->first();
         if(!empty($single)){
             return response()->json($single);
         }else{
