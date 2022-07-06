@@ -74,17 +74,13 @@ class ProductCategoryController extends Controller
         $limit = $request->limit;
         $categories = ProductCategory::where('id',$request->id)
             ->with(['products'=>function($query) use($limit) {
-                return $query->where('ec_products.status','published')
+                return $query->with(['stores'])->where('ec_products.status','published')
                     ->get()
                     ->take($limit);
             }])
             ->first();
         $categories['base_url'] ='https://ubgmart.com/storage/';
 
-            $product = $categories->products;
-            foreach($product as $p){
-                $p['stores_info'] = $p->stores;
-            }
 
         return response()->json($categories);
     }
