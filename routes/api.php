@@ -52,6 +52,7 @@ Route::get('/single-order',[\App\Http\Controllers\API\OrderController::class,'ge
 
 //Store route
 Route::get('/list-locator', [App\Http\Controllers\API\StoreLocatorController::class, 'getListStore'])->middleware('authbasic');
+Route::get('/single-locator', [App\Http\Controllers\API\StoreLocatorController::class, 'getSingleStore'])->middleware('authbasic');
 //menu route
 /* main menu top */
 Route::get('/main-menu',[\App\Http\Controllers\API\MenuNodeController::class,'getMainMenu'])->middleware('authbasic');
