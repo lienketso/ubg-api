@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
 
 class Product extends Model
 {
     use HasFactory;
-
+    use HasEagerLimit;
     protected $table = 'ec_products';
 
     protected $guarded = [];

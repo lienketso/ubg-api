@@ -16,6 +16,7 @@
         "laravel/tinker": "^2.7",
         "prettus/l5-repository": "^2.8",
         "spatie/laravel-json-api-paginate": "^1.11",
+        "staudenmeir/eloquent-eager-limit": "^1.0",
         "zircote/swagger-php": "2.0.13"
     },
     "require-dev": {
