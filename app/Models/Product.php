@@ -11,7 +11,7 @@ use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
 class Product extends Model
 {
     use HasFactory;
-    use HasEagerLimit;
+//    use HasEagerLimit;
     protected $table = 'ec_products';
 
     protected $guarded = [];

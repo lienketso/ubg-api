@@ -10,7 +10,7 @@ use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
 class ProductCategory extends Model
 {
     use HasFactory;
-    use HasEagerLimit;
+//    use HasEagerLimit;
     protected $table = 'ec_product_categories';
 
     protected $fillable = [
