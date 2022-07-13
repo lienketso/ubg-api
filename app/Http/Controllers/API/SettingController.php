@@ -73,9 +73,7 @@ class SettingController extends Controller
      */
     public function getGlobalSetting()
     {
-        $featuredCategories = ProductCategory::with(['products' => function($q) {
-            return $q->where('status', 'published')->take(6);
-        }])->whereIn('id', [103,77,89,87,86,107,104,119])->where('status', 'published')->get();
+        $featuredCategories = ProductCategory::with(['products'])->whereIn('id', [103,52,100,95,104,181,104,92])->where('status', 'published')->get();
 
         $settings = [
             'featured_categories' => $featuredCategories
