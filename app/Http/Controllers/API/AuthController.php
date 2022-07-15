@@ -432,5 +432,26 @@ class AuthController extends Controller
 
 
     }
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/permanent-delete",
+     *     summary="Delete permanent",
+     *     tags={"Users"},
+     *     description="Delete permanent",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getPermanentDelete(){
+        return response('Success permanent delete ', 200)
+            ->header('Content-Type', 'text/plain');
+    }
 
 }

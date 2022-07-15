@@ -31,6 +31,7 @@ Route::group([
         ->name('update-profile')->middleware('authbasic');
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
         ->name('reset-password')->middleware('authbasic');
+    Route::get('/permanent-delete',[\App\Http\Controllers\API\AuthController::class,'getPermanentDelete'])->middleware('authbasic');
     Route::group([
         'middleware' => 'auth:api'
     ], function() {
