@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewOrders;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Repositories\SettingRepository;
+use Carbon\Carbon;
+use http\Client\Response;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Swagger\Annotations as SWG;
 
 class SettingController extends Controller
@@ -83,6 +87,37 @@ class SettingController extends Controller
         ];
 
         return response()->json($settings);
+    }
+
+    public function sendMailTest(SettingRepository $settingRepository){
+        $setting = $settingRepository->getSetting('admin_email');
+        $email = is_array($setting->value) ? $setting->value : (array)json_decode($setting->value, true);
+        $email = collect(array_filter($email));
+        $product_list = array(['product_name'=>'test','product_price'=>100000]);
+        $customer_name = 'Nguyễn Thành An';
+        $customer_phone = '0979 823 452';
+        $customer_address = 'T3 Thăng Long Victory';
+        $payment_method = 'Cod';
+        $shipping_method = 'BestExpress';
+        $created_order = Carbon::now();
+        Mail::to($email)->send(new NewOrders(
+            $product_list,
+            $customer_name,
+            $customer_phone,
+            $customer_address,
+            $shipping_method,
+            $payment_method,
+            $created_order
+        ));
+        return response()->json(
+            [
+                'success' => true,
+                'message' => "Thank you for subscribing to our email, please check your inbox"
+            ],
+            200
+        );
+
+
     }
 
 

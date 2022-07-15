@@ -12,4 +12,10 @@ class SettingRepository extends BaseRepository
     {
         return Setting::class;
     }
+
+    public function getSetting($key){
+        $setting = $this->findWhere(['key'=>$key])->first();
+        return $setting;
+    }
+
 }

@@ -3,21 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NewOrders;
 use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\StoreLocator;
 use App\Repositories\AddressRepository;
+use App\Repositories\CustomerRepository;
 use App\Repositories\DiscountRepository;
 use App\Repositories\OrderAddressRepository;
 use App\Repositories\OrderProductRepository;
 use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductRepository;
+use App\Repositories\SettingRepository;
 use App\Repositories\UsersRepository;
 use App\Traits\BestExpressConnection;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Swagger\Annotations as SWG;
@@ -32,6 +36,8 @@ class OrderController extends Controller
     protected $paymentRepository;
     protected $discountRepository;
     protected $usersRepository;
+    protected $settingRepository;
+    protected $customerRepository;
 
     public function __construct(OrderRepository $orderRepository,
                                 AddressRepository $addressRepository,
@@ -40,7 +46,9 @@ class OrderController extends Controller
                                 OrderProductRepository $orderProductRepository,
                                 PaymentRepository $paymentRepository,
                                 DiscountRepository $discountRepository,
-                                UsersRepository $usersRepository
+                                UsersRepository $usersRepository,
+                                SettingRepository $settingRepository,
+                                CustomerRepository $customerRepository
     )
 
     {
@@ -52,6 +60,8 @@ class OrderController extends Controller
         $this->paymentRepository = $paymentRepository;
         $this->discountRepository = $discountRepository;
         $this->usersRepository = $usersRepository;
+        $this->settingRepository = $settingRepository;
+        $this->customerRepository = $customerRepository;
     }
 
     /**
@@ -500,6 +510,38 @@ class OrderController extends Controller
             }
 
             //Trừ số lượng sản phẩm từ trong kho
+
+            //Gửi email thông báo đơn hàng
+            $customer = $this->customerRepository->find($currentUserId);
+            $customer_name = $customer->name;
+            $customer_phone = $customer->phone;
+            $customer_address = $address->address;
+            $setting = $this->settingRepository->getSetting('admin_email');
+            $emailTo = is_array($setting->value) ? $setting->value : (array)json_decode($setting->value, true);
+            $emailTo = collect(array_filter($emailTo));
+            $product_list = $cartData;
+            $shipping_method = $request->input('shipping_method', 'default');
+            if($paymentMethod=='cod'){
+                $paymentMethod = 'Thanh toán khi nhận hàng ( COD )';
+            }
+            $payment_method = $paymentMethod;
+            $created_order = Carbon::now();
+            $total_amount = $orderAmount;
+            $shipping_amount = $shippingAmount;
+            $discount_amount = $discountAmount;
+
+            Mail::to($emailTo)->send(new NewOrders(
+                $product_list,
+                $customer_name,
+                $customer_phone,
+                $customer_address,
+                $shipping_method,
+                $payment_method,
+                $created_order,
+                $total_amount,
+                $shipping_amount,
+                $discount_amount
+            ));
 
             return response()->json($sessionData);
 

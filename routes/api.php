@@ -145,4 +145,5 @@ Route::get('get-ubgxu-exchange',[\App\Http\Controllers\API\SettingController::cl
     ->middleware('authbasic');
 
 Route::get('settings',[\App\Http\Controllers\API\SettingController::class,'getGlobalSetting']);
+Route::get('send-mail-test',[\App\Http\Controllers\API\SettingController::class,'sendMailTest']);
 
