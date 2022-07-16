@@ -11,7 +11,7 @@ use Staudenmeir\EloquentEagerLimit\HasEagerLimit;
 class Product extends Model
 {
     use HasFactory;
-//    use HasEagerLimit;
+    use HasEagerLimit;
     protected $table = 'ec_products';
 
     protected $guarded = [];
@@ -28,5 +28,4 @@ class Product extends Model
     public function stores() : HasMany{
         return $this->hasMany(Stores::class,'id','store_id');
     }
-
 }
