@@ -80,7 +80,7 @@ class SettingController extends Controller
     {
         $featuredCategories = ProductCategory::with(['products' => function($q) {
             return $q->where('ec_products.status', 'published')->latest()->limit(30);
-        }])->whereIn('id', [103,52,100,95,104,181,104,92])->get();
+        }])->whereIn('id', [103,52,100,95,104,181,104,92, 156, 162, 76, 97, 80, 197, 78])->get();
 
         $settings = [
             'featured_categories' => $featuredCategories
