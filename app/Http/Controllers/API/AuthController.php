@@ -108,7 +108,9 @@ class AuthController extends Controller
                 'email'=>$request->username,
                 'password'=>Hash::make($request->password),
                 'name'=>'User default',
-                'register_resource'=>'app'
+                'register_resource'=>'app',
+                'is_verified' => 1,
+                'status' => 'active'
             ]);
         }
         //nếu có chương trình tặng xu
