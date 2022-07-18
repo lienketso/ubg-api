@@ -361,12 +361,12 @@ class AuthController extends Controller
      *     summary="Cập nhật thông tin avatar",
      *     tags={"Users"},
      *     description="Update avatar, base path https://ubgmart.com/",
-     *     security = { { "basicAuth": {} } },
-     *     @SWG\Parameter(
-     *         name="id",
-     *         in="query",
+     *     security = { { "Bearer Token": {} } },
+     *    @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
      *         type="string",
-     *         description="User id",
+     *         description="Bearer Auth",
      *         required=true,
      *     ),
      *     @SWG\Parameter(
@@ -394,28 +394,32 @@ class AuthController extends Controller
         if ($validate->fails()) {
             return response()->json(['error'=>$validate->errors()], 401);
         }
-        $customer = Customers::find($request->id);
-        if ($file = $request->file('file')) {
+        $user = $request->user();
+        if($user && !empty($user)){
+            $customer = Customers::find($user->id);
+            if ($file = $request->file('file')) {
 
-            $image = $file;
-            $path = date('Y').'/'.date('m').'/'.date('d');
-            $newnname = time().'-'.$image->getClientOriginalName();
-            $newnname = str_replace(' ','-',$newnname);
-            $input['thumbnail'] = $path.'/'.$newnname;
-            $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/',$newnname);
-//            $path = $file->store('public/files');
-//            $name = $file->getClientOriginalName();
-            $customer->avatar = 'storage/customers/'.$newnname;
-            $customer->save();
+                $image = $file;
+                $path = date('Y').'/'.date('m').'/'.date('d');
+                $newnname = time().'-'.$image->getClientOriginalName();
+                $newnname = str_replace(' ','-',$newnname);
+                $input['thumbnail'] = $path.'/'.$newnname;
+                $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/',$newnname);
+                $customer->avatar = 'storage/customers/'.$newnname;
+                $customer->save();
 
-            return response()->json([
-                "success" => true,
-                "message" => "File successfully uploaded",
-                "file" => $newnname,
-                "path"=>'/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/'.$newnname
-            ]);
+                return response()->json([
+                    "success" => true,
+                    "message" => "File successfully uploaded",
+                    "file" => $newnname,
+                    "path"=>'/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/'.$newnname
+                ]);
 
+            }
+        }else{
+            return response()->json(['message'=>'chua login account']);
         }
+
 
     }
 

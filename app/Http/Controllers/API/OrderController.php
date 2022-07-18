@@ -83,7 +83,21 @@ class OrderController extends Controller
      *         name="status",
      *         in="query",
      *         type="string",
-     *         description="Trạng thái đơn hàng : canceled : Huỷ , pending: Chưa xử lý, processing: Đang xử lý, completed: Đã hoàn thành",
+     *         description="Trạng thái đơn hàng : canceled : Huỷ , pending: Chưa xử lý, processing: Đang xử lý, completed: Đang giao hàng",
+     *         required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="is_confirmed",
+     *         in="query",
+     *         type="string",
+     *         description="Xac nhan don hang : 1 : Đã xác nhận ,0 : Chưa xác nhận",
+     *         required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="is_finished",
+     *         in="query",
+     *         type="string",
+     *         description="Don hang hoan thanh : 1 : Đã hoàn thành ,0 : Chưa hoàn thành",
      *         required=false,
      *     ),
      *     @SWG\Response(
@@ -102,6 +116,12 @@ class OrderController extends Controller
         try{
             if(!is_null($request->status) && $request->status){
                 $q->where('status',$request->status);
+            }
+            if(!is_null($request->is_confirmed) && $request->is_confirmed){
+                $q->where('is_confirmed',$request->is_confirmed);
+            }
+            if(!is_null($request->is_finished) && $request->is_finished){
+                $q->where('is_finished',$request->is_finished);
             }
             $product = [];
             $orders = $q->orderBy('created_at','desc')
