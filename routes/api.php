@@ -32,6 +32,7 @@ Route::group([
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
         ->name('reset-password')->middleware('authbasic');
     Route::get('/permanent-delete',[\App\Http\Controllers\API\AuthController::class,'getPermanentDelete'])->middleware('authbasic');
+    Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar'])->middleware('authbasic');
     Route::group([
         'middleware' => 'auth:api'
     ], function() {
@@ -44,12 +45,17 @@ Route::group([
         //route ubgxu
         Route::get('get-ubgxu-by-user',[\App\Http\Controllers\API\OrderController::class,'getUbgXu']);
         Route::get('/get-presenter-by-me',[\App\Http\Controllers\API\AuthController::class,'getPresenterByAuth']);
+        //xác nhận nhận được hàng
+        Route::get('/confirm-order-received',[\App\Http\Controllers\API\OrderController::class,'ChangeOrderStatus']);
+        Route::post('/add-customer-address',[\App\Http\Controllers\API\AuthController::class,'addAddress']);
+        Route::post('/update-customer-address',[\App\Http\Controllers\API\AuthController::class,'updateAddress']);
     });
 });
 /* danh sách đơn hàng của khách hàng */
 Route::get('/list-order',[\App\Http\Controllers\API\OrderController::class,'getListOrder'])->middleware('authbasic');
 /* chi tiết đơn hàng của khách hàng */
 Route::get('/single-order',[\App\Http\Controllers\API\OrderController::class,'getSingleOrder'])->middleware('authbasic');
+
 
 //Store route
 Route::get('/list-locator', [App\Http\Controllers\API\StoreLocatorController::class, 'getListStore'])->middleware('authbasic');

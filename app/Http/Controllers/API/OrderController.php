@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\NewOrders;
 use App\Models\Order;
 use App\Models\OrderAddress;
+use App\Models\OrderHistory;
 use App\Models\StoreLocator;
 use App\Repositories\AddressRepository;
 use App\Repositories\CustomerRepository;
@@ -1040,6 +1041,81 @@ class OrderController extends Controller
                 return response()->json($listOrder);
         }
 
+        }catch (\Exception $e){
+            return response()->json(['error'=>'authentication fail','exception'=>$e->getMessage()]);
+        }
+    }
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/confirm-order-received",
+     *     summary="Đổi trạng thái đơn hàng ",
+     *     description="Xác nhận đã nhận hàng hoặc hủy đơn hàng",
+     *     tags={"Order"},
+     *     security = { { "Bearer Token": {} } },
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="id",
+     *         in="header",
+     *         type="string",
+     *         description="Id của đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="status",
+     *         in="header",
+     *         type="string",
+     *         description="completed : Xác nhận đã nhận hàng , canceled : Hủy đơn hàng",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function ChangeOrderStatus(Request $request){
+        try{
+            $id = $request->id;
+            $status = $request->status;
+            $user = $request->user();
+            if($user && !empty($user)){
+                $order = $this->orderRepository->find($id);
+                $order->status = $status;
+                $order->save();
+
+                //order history
+                if($status=='completed'){
+                    $data = [
+                        'action'=>'update_status',
+                        'description'=>'Xác nhận đã nhận được hàng từ khách hàng '.$user->name,
+                        'order_id'=>$id,
+                        'user_id'=>$user->id
+                    ];
+                }else if($status=='canceled'){
+                    $data = [
+                        'action'=>'update_status',
+                        'description'=>'Xác nhận hủy đơn hàng từ khách hàng '.$user->name,
+                        'order_id'=>$id,
+                        'user_id'=>$user->id
+                    ];
+                }
+
+                OrderHistory::create($data);
+                return response()->json([
+                    'message'=>'Xác nhận thành công',
+                    'data'=>$order
+                ]);
+            }
         }catch (\Exception $e){
             return response()->json(['error'=>'authentication fail','exception'=>$e->getMessage()]);
         }

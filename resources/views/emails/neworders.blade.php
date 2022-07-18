@@ -170,14 +170,9 @@
                             <!--end space height -->
                             <tr>
                                 <td style="min-height: 400px; padding: 15px; font-size: 13px;">
-
-
                                     {{--content order--}}
                                         <h2>Thành công !, bạn nhận được đơn hàng từ App Ubgmart 4.0 !</h2>
-
                                         <h3>Thông tin đơn hàng</h3>
-
-
                                         <table>
                                             <tr>
                                                 <th>Sản phẩm</th>

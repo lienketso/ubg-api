@@ -19,6 +19,7 @@ class Customers extends Model
         'password',
         'avatar',
         'dob',
+        'avatar',
         'register_resource',
         'ubgxu',
         'presenter_id',

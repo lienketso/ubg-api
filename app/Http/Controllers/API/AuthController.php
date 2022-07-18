@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\SettingRegister;
 use App\Models\User;
+use App\Repositories\AddressRepository;
 use App\Repositories\CustomerRepository;
 use App\Repositories\SettingRegisterRepository;
 use App\Repositories\UbgxuPaylogRepository;
@@ -16,21 +17,24 @@ use Swagger\Annotations as SWG;
 use Validator;
 use App\Models\Customers;
 use Laravel\Socialite\Facades\Socialite;
+use function Symfony\Component\String\Slugger\slug;
 
 class AuthController extends Controller
 {
     protected $customerRepository;
     protected $ubgxuPaylogRepository;
     protected $settingRegisterRepository;
-
+    protected $addressRepository;
     public function __construct(
         CustomerRepository $customerRepository,
         UbgxuPaylogRepository $ubgxuPaylogRepository,
-        SettingRegisterRepository $settingRegisterRepository
+        SettingRegisterRepository $settingRegisterRepository,
+        AddressRepository $addressRepository
     )
     {
         $this->customerRepository = $customerRepository;
         $this->ubgxuPaylogRepository = $ubgxuPaylogRepository;
+        $this->addressRepository = $addressRepository;
     }
 
     /**
@@ -319,7 +323,7 @@ class AuthController extends Controller
      *     in="query",
      *     type="string",
      *     description="Input date of birth want to change",
-     *     required=true,
+     *     required=false,
      *     ),
      *     @SWG\Response(
      *         response=200,
@@ -331,12 +335,311 @@ class AuthController extends Controller
      *     )
      * )
      */
-    public function updateProfile(Request $request)
-    {
+    public function updateProfile(Request $request){
+        $validate = Validator::make($request->all(),[
+            'id'=>'required',
+            'phone'=>'required|numeric'
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json(['error'=>$validate->errors()], 401);
+        }
+
         $customer = Customers::find($request->id);
-        $customer->update($request->all());
+
+        $customer->name = $request->name;
+        $customer->phone = $request->phone;
+        $customer->email = $request->email;
+        $customer->dob = $request->dob;
+        $customer->save();
+//      $customer->update($request->all());
         return response()->json($customer);
     }
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/update-avatar",
+     *     summary="Cập nhật thông tin avatar",
+     *     tags={"Users"},
+     *     description="Update avatar, base path https://api.ubgmart.com/",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="id",
+     *         in="query",
+     *         type="string",
+     *         description="User id",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="file",
+     *     in="query",
+     *     type="file",
+     *     description="Avatar",
+     *     required=false,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function updateAvatar(Request $request){
+        $validate = Validator::make($request->all(),[
+            'id'=>'required',
+            'file'=>'required|mimes:jpg,png,jpeg,gif|max:2048'
+        ]);
+        if ($validate->fails()) {
+            return response()->json(['error'=>$validate->errors()], 401);
+        }
+        $customer = Customers::find($request->id);
+        if ($file = $request->file('file')) {
+
+            $image = $file;
+            $path = date('Y').'/'.date('m').'/'.date('d');
+            $newnname = time().'-'.$image->getClientOriginalName();
+            $newnname = str_replace(' ','-',$newnname);
+            $input['thumbnail'] = $path.'/'.$newnname;
+            $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/',$newnname);
+//            $path = $file->store('public/files');
+//            $name = $file->getClientOriginalName();
+            $customer->avatar = '/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/'.$newnname;
+            $customer->save();
+
+            return response()->json([
+                "success" => true,
+                "message" => "File successfully uploaded",
+                "file" => $newnname,
+                "path"=>'/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/'.$newnname
+            ]);
+
+        }
+
+    }
+
+    //thêm địa chỉ mới cho user
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/add-customer-address",
+     *     summary="Thêm địa chỉ cho khách hàng",
+     *     tags={"Users"},
+     *     description="Thêm địa chỉ mới cho tài khoản khách hàng",
+     *     security = { { "Bearer Token": {} } },
+     *    @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="name",
+     *         in="query",
+     *         type="string",
+     *         description="Họ và tên",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="email",
+     *     in="query",
+     *     type="string",
+     *     description="Địa chỉ email",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="phone",
+     *     in="query",
+     *     type="string",
+     *     description="Số điện thoại",
+     *     required=false,
+     *     ),
+     *      @SWG\Parameter(
+     *     name="state",
+     *     in="query",
+     *     type="string",
+     *     description="Quận Huyện",
+     *     required=true,
+     *     ),
+     *      @SWG\Parameter(
+     *     name="city",
+     *     in="query",
+     *     type="string",
+     *     description="Thành phố",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="ward",
+     *     in="query",
+     *     type="string",
+     *     description="Xã Phường",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="address",
+     *     in="query",
+     *     type="string",
+     *     description="Địa chỉ chi tiết",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="is_default",
+     *     in="query",
+     *     type="integer",
+     *     description="Là địa chỉ mặc định ( 1 , 0)",
+     *     required=false,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function addAddress(Request $request){
+        $user = $request->user();
+        $validate = Validator::make($request->all(),[
+            'name'=>'required',
+            'email'=>'required|email',
+            'phone'=>'required|numeric',
+            'state'=>'required',
+            'city'=>'required',
+            'address'=>'required'
+        ]);
+        if ($validate->fails()) {
+            return response()->json(['error'=>$validate->errors()], 401);
+        }
+        if($user && !empty($user)){
+            $data = [
+                'name'=>$request->name,
+                'email'=>$request->email,
+                'phone'=>$request->phone,
+                'country'=>'VN',
+                'state'=>$request->state,
+                'city'=>$request->city,
+                'ward'=>$request->ward,
+                'address'=>$request->address,
+                'is_default'=>$request->is_default,
+                'customer_id'=>$user->id
+            ];
+           $addressCreate = $this->addressRepository->create($data);
+           return response()->json(['message'=>'Create address success','data'=>$addressCreate]);
+        }
+    }
+
+    //Sửa địa chỉ
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/update-customer-address",
+     *     summary="Cập nhật địa chỉ khách hàng",
+     *     tags={"Users"},
+     *     description="Sửa địa chỉ khách hàng theo id",
+     *     security = { { "Bearer Token": {} } },
+     *    @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *    @SWG\Parameter(
+     *         name="id",
+     *         in="query",
+     *         type="string",
+     *         description="Id của địa chỉ",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *         name="name",
+     *         in="query",
+     *         type="string",
+     *         description="Họ và tên",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="email",
+     *     in="query",
+     *     type="string",
+     *     description="Địa chỉ email",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="phone",
+     *     in="query",
+     *     type="string",
+     *     description="Số điện thoại",
+     *     required=false,
+     *     ),
+     *      @SWG\Parameter(
+     *     name="state",
+     *     in="query",
+     *     type="string",
+     *     description="Quận Huyện",
+     *     required=true,
+     *     ),
+     *      @SWG\Parameter(
+     *     name="city",
+     *     in="query",
+     *     type="string",
+     *     description="Thành phố",
+     *     required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="ward",
+     *     in="query",
+     *     type="string",
+     *     description="Xã Phường",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="address",
+     *     in="query",
+     *     type="string",
+     *     description="Địa chỉ chi tiết",
+     *     required=false,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="is_default",
+     *     in="query",
+     *     type="integer",
+     *     description="Là địa chỉ mặc định ( 1 , 0)",
+     *     required=false,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function updateAddress(Request $request){
+        $id = $request->id;
+        $user = $request->user();
+        $validate = Validator::make($request->all(),[
+            'name'=>'required',
+            'email'=>'required|email',
+            'phone'=>'required|numeric',
+            'state'=>'required',
+            'city'=>'required',
+            'address'=>'required'
+        ]);
+        if ($validate->fails()) {
+            return response()->json(['error'=>$validate->errors()], 401);
+        }
+        if($user && !empty($user)){
+            $addressInfo = $this->addressRepository->findWhere(['id'=>$id,'customer_id'=>$user->id])->first();
+            $addressInfo->update($request->all());
+            return response()->json(['message'=>'Update address success','data'=>$addressInfo]);
+        }
+    }
+
 
     /**
      * @SWG\Post(
