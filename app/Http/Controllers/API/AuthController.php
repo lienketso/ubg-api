@@ -395,8 +395,9 @@ class AuthController extends Controller
             return response()->json(['error'=>$validate->errors()], 401);
         }
         $user = $request->user();
+        $customer = Customers::find($user->id);
         if($user && !empty($user)){
-            $customer = Customers::find($user->id);
+
             if ($file = $request->file('file')) {
 
                 $image = $file;
