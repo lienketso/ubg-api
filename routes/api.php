@@ -32,7 +32,7 @@ Route::group([
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
         ->name('reset-password')->middleware('authbasic');
     Route::get('/permanent-delete',[\App\Http\Controllers\API\AuthController::class,'getPermanentDelete'])->middleware('authbasic');
-    Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
+
     Route::group([
         'middleware' => 'auth:api'
     ], function() {
@@ -49,6 +49,7 @@ Route::group([
         Route::get('/confirm-order-received',[\App\Http\Controllers\API\OrderController::class,'ChangeOrderStatus']);
         Route::post('/add-customer-address',[\App\Http\Controllers\API\AuthController::class,'addAddress']);
         Route::post('/update-customer-address',[\App\Http\Controllers\API\AuthController::class,'updateAddress']);
+        Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
     });
 });
 /* danh sách đơn hàng của khách hàng */
