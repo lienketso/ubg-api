@@ -32,7 +32,7 @@ Route::group([
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
         ->name('reset-password')->middleware('authbasic');
     Route::get('/permanent-delete',[\App\Http\Controllers\API\AuthController::class,'getPermanentDelete'])->middleware('authbasic');
-    Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar'])->middleware('authbasic');
+    Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
     Route::group([
         'middleware' => 'auth:api'
     ], function() {
