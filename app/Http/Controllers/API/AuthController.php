@@ -360,7 +360,7 @@ class AuthController extends Controller
      *     path="/api/auth/update-avatar",
      *     summary="Cập nhật thông tin avatar",
      *     tags={"Users"},
-     *     description="Update avatar, base path https://api.ubgmart.com/",
+     *     description="Update avatar, base path https://ubgmart.com/",
      *     security = { { "basicAuth": {} } },
      *     @SWG\Parameter(
      *         name="id",
@@ -402,17 +402,17 @@ class AuthController extends Controller
             $newnname = time().'-'.$image->getClientOriginalName();
             $newnname = str_replace(' ','-',$newnname);
             $input['thumbnail'] = $path.'/'.$newnname;
-            $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/',$newnname);
+            $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/',$newnname);
 //            $path = $file->store('public/files');
 //            $name = $file->getClientOriginalName();
-            $customer->avatar = '/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/'.$newnname;
+            $customer->avatar = 'storage/customers/'.$newnname;
             $customer->save();
 
             return response()->json([
                 "success" => true,
                 "message" => "File successfully uploaded",
                 "file" => $newnname,
-                "path"=>'/home/ubgmart.com/public_html/ubg-v2/public/storage/customer/'.$newnname
+                "path"=>'/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/'.$newnname
             ]);
 
         }
