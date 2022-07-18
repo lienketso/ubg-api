@@ -374,7 +374,7 @@ class AuthController extends Controller
      *     in="query",
      *     type="file",
      *     description="Avatar",
-     *     required=false,
+     *     required=true,
      *     ),
      *     @SWG\Response(
      *         response=200,
@@ -403,7 +403,6 @@ class AuthController extends Controller
                 $path = date('Y').'/'.date('m').'/'.date('d');
                 $newnname = time().'-'.$image->getClientOriginalName();
                 $newnname = str_replace(' ','-',$newnname);
-                $input['thumbnail'] = $path.'/'.$newnname;
                 $image->move('/home/ubgmart.com/public_html/ubg-v2/public/storage/customers/',$newnname);
                 $customer->avatar = 'storage/customers/'.$newnname;
                 $customer->save();
