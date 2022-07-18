@@ -388,7 +388,6 @@ class AuthController extends Controller
      */
     public function updateAvatar(Request $request){
         $validate = Validator::make($request->all(),[
-            'id'=>'required',
             'file'=>'required|mimes:jpg,png,jpeg,gif|max:2048'
         ]);
         if ($validate->fails()) {
