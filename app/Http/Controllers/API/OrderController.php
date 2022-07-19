@@ -178,8 +178,14 @@ class OrderController extends Controller
      * )
      */
     public function getOrderDelivering(Request $request){
-
-        return response()->json(['message'=>'Đang cập nhật...']);
+        $shipment = $this->shipmentRepository->with(['order'=>function($e) use($request){
+            return $e->where('user_id',203)->get();
+        }])->findWhere(['status'=>$request->status])->all();
+        $order = [];
+        foreach($shipment as $d){
+            $order[] = $d->order;
+        }
+        return response()->json($order);
     }
 
     /**
