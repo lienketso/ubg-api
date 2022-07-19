@@ -197,7 +197,7 @@ class AuthController extends Controller
     public function phoneVerify(Request $request){
         $phone = $request->phone;
         $otp = $request->otp;
-        $customer = $this->customerRepository->findWhere(['phone'=>$phone,'otp'=>$otp])->first();
+        $customer = $this->customerRepository->findWhere(['phone'=>$phone,'phone_code'=>$otp])->first();
         if ($customer != null) {
             $customer->is_verified = 1;
             $customer->save();
