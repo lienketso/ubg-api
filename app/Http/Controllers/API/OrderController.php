@@ -185,9 +185,10 @@ class OrderController extends Controller
             }])->findWhere(['status'=>$request->status])->all();
             $order = [];
             foreach($shipment as $d){
-                $order[] = $d->order;
+                $order[] = $d->order->toArray();
+                array_filter($order);
             }
-            return response()->json($shipment);
+            return response()->json($order);
         }else{
             return response()->json(['message'=>'Vui long login !']);
         }

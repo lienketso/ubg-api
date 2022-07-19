@@ -207,7 +207,7 @@ class AuthController extends Controller
 
     //OTP Voice
     /**
-     * @SWG\Post(
+     * @SWG\Get(
      *     path="/api/auth/phone-verify-refresh",
      *     summary="Gọi lại mã OTP",
      *     tags={"Users"},
