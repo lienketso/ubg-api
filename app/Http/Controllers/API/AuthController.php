@@ -199,11 +199,9 @@ class AuthController extends Controller
         $otp = $request->otp;
         $customer = $this->customerRepository->findWhere(['phone'=>$phone,'otp'=>$otp])->first();
         if ($customer != null) {
-            $this->customerRepository->update([
-                'phone' => $phone
-            ], [
-                'is_verified' => 1
-            ]);
+            $customer->is_verified = 1;
+            $customer->save();
+            return response()->json(['message'=>'verify successful']);
         }
     }
 
