@@ -32,6 +32,9 @@ Route::group([
     Route::post('/reset-password',[\App\Http\Controllers\API\AuthController::class,'ForgotPassword'])
         ->name('reset-password')->middleware('authbasic');
     Route::get('/permanent-delete',[\App\Http\Controllers\API\AuthController::class,'getPermanentDelete'])->middleware('authbasic');
+    //phone verify
+    Route::post('/phone-verify',[\App\Http\Controllers\API\AuthController::class,'phoneVerify'])->middleware('authbasic');
+    Route::get('/phone-verify-refresh',[\App\Http\Controllers\API\AuthController::class,'refreshOtp'])->middleware('authbasic');
 
     Route::group([
         'middleware' => 'auth:api'
@@ -50,6 +53,7 @@ Route::group([
         Route::post('/add-customer-address',[\App\Http\Controllers\API\AuthController::class,'addAddress']);
         Route::post('/update-customer-address',[\App\Http\Controllers\API\AuthController::class,'updateAddress']);
         Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
+        Route::get('/get-order-delivering',[\App\Http\Controllers\API\OrderController::class,'getOrderDelivering']);
     });
 });
 /* danh sách đơn hàng của khách hàng */

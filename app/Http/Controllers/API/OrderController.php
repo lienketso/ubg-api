@@ -17,6 +17,7 @@ use App\Repositories\OrderRepository;
 use App\Repositories\PaymentRepository;
 use App\Repositories\ProductRepository;
 use App\Repositories\SettingRepository;
+use App\Repositories\ShipmentRepository;
 use App\Repositories\UsersRepository;
 use App\Traits\BestExpressConnection;
 use Carbon\Carbon;
@@ -39,6 +40,7 @@ class OrderController extends Controller
     protected $usersRepository;
     protected $settingRepository;
     protected $customerRepository;
+    protected $shipmentRepository;
 
     public function __construct(OrderRepository $orderRepository,
                                 AddressRepository $addressRepository,
@@ -49,7 +51,8 @@ class OrderController extends Controller
                                 DiscountRepository $discountRepository,
                                 UsersRepository $usersRepository,
                                 SettingRepository $settingRepository,
-                                CustomerRepository $customerRepository
+                                CustomerRepository $customerRepository,
+                                ShipmentRepository $shipmentRepository
     )
 
     {
@@ -63,6 +66,7 @@ class OrderController extends Controller
         $this->usersRepository = $usersRepository;
         $this->settingRepository = $settingRepository;
         $this->customerRepository = $customerRepository;
+        $this->shipmentRepository = $shipmentRepository;
     }
 
     /**
@@ -141,6 +145,43 @@ class OrderController extends Controller
         }
 
     }
+
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/get-order-delivering,
+     *     summary="Đơn hàng đang vận chuyển",
+     *     tags={"Order"},
+     *     description="Lấy ra danh sách đơn hàng đang vận chuyển",
+     *     security = { { "Bearer Token": {} } },
+     *    @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="status",
+     *     in="query",
+     *     type="string",
+     *     description="Trạng thái ( delevering : đang vận chuyển )",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getOrderDelivering(Request $request){
+
+        return response()->json(['message'=>'Đang cập nhật...']);
+    }
+
     /**
      * @SWG\Get(
      *     path="/api/single-order",

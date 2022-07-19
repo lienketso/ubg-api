@@ -23,7 +23,9 @@ class Customers extends Model
         'register_resource',
         'ubgxu',
         'presenter_id',
-        'affiliation_id'
+        'affiliation_id',
+        'phone_code',
+        'voice_count'
     ];
     protected $hidden = [
         'password',

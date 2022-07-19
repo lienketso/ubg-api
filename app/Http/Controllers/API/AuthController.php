@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Auth;
+use Illuminate\Support\Facades\Http;
+use phpDocumentor\Reflection\Types\String_;
 use Swagger\Annotations as SWG;
 use Validator;
 use App\Models\Customers;
@@ -106,7 +108,26 @@ class AuthController extends Controller
             ]);
 
             $customer->affiliation_id = intval(1000000 + $customer->id);
+
+
+            //call voice OTP
+            $generator = "1357902468";
+            $result = "";
+            for ($i = 1; $i <= 6; $i++) {
+                $result .= substr($generator, (rand() % (strlen($generator))), 1);
+            }
+            $otp = $result;
+            $customer->phone_code = $otp;
+
             $customer->save();
+
+            Http::withoutVerifying()
+                ->withBasicAuth('ubg', '3hYvwtnNV4NtFvDL')
+                ->post('https://otpubg.ezcall.vn/api/voiceotp.php',[
+                    'otpcode' => $otp,
+                    'phone' => $customer->phone
+                ]);
+
 
         } else if (filter_var($request->username, FILTER_VALIDATE_EMAIL)) {
             $validator = Validator::make($request->all(), [
@@ -128,18 +149,6 @@ class AuthController extends Controller
             $customer->affiliation_id = intval(1000000 + $customer->id);
             $customer->save();
         }
-        //nếu có chương trình tặng xu
-//        if($settingRegister && $settingRegister!=null){
-//            $upxu = ['ubgxu'=>$settingRegister->total_plus_ubgxu];
-//            $this->customerRepository->update($upxu,$customer->id);
-//            //lưu lịch sử cộng xu khi đăng ký qua app
-//            $data = [
-//                'content'=>'Bạn được cộng '. $settingRegister->total_plus_ubgxu. ' xu từ chương trình đăng ký qua App',
-//                'comeback'=>$settingRegister->total_plus_ubgxu,
-//                'customer_id'=>$customer->id
-//            ];
-//            $this->ubgxuPaylogRepository->create($data);
-//        }
 
         //nếu có mã giới thiệu
         if ($request->input('affiliation_id') != null) {
@@ -154,6 +163,103 @@ class AuthController extends Controller
         return response()
             ->json(['data' => $customer, 'access_token' => $token, 'token_type' => 'Bearer']);
     }
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/phone-verify",
+     *     summary="Kích hoạt OTP",
+     *     tags={"Users"},
+     *     description="Kích hoạt OTP cho user",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="phone",
+     *         in="query",
+     *         type="string",
+     *         description="số điện thoại",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *     name="otp",
+     *     in="query",
+     *     type="string",
+     *     description="Mật khẩu OTP",
+     *     required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function phoneVerify(Request $request){
+        $phone = $request->phone;
+        $otp = $request->otp;
+        $customer = $this->customerRepository->findWhere(['phone'=>$phone,'otp'=>$otp])->first();
+        if ($customer != null) {
+            $this->customerRepository->update([
+                'phone' => $phone
+            ], [
+                'is_verified' => 1
+            ]);
+        }
+    }
+
+    //OTP Voice
+    /**
+     * @SWG\Post(
+     *     path="/api/auth/phone-verify-refresh",
+     *     summary="Gọi lại mã OTP",
+     *     tags={"Users"},
+     *     description="Gọilại mã OTP cho user",
+     *     security = { { "basicAuth": {} } },
+     *     @SWG\Parameter(
+     *         name="phone",
+     *         in="query",
+     *         type="string",
+     *         description="số điện thoại",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function refreshOtp(Request $request)
+    {
+        $phone = $request->phone;
+        $generator = "1357902468";
+        $result = "";
+        for ($i = 1; $i <= 6; $i++) {
+            $result .= substr($generator, (rand() % (strlen($generator))), 1);
+        }
+        $customer = $this->customerRepository->findWhere(['phone'=>$phone])->first();
+        $customer->phone_code = $result;
+        $customer->voice_count = $customer->voice_count-1;
+        $customer->save();
+
+        if($customer->voice_count<=0){
+            return response()->json(['message'=>'Đã hết số lần gọi OTP, vui lòng liên hệ Admin']);
+        }else{
+            Http::withoutVerifying()
+                ->withBasicAuth('ubg', '3hYvwtnNV4NtFvDL')
+                ->post('https://otpubg.ezcall.vn/api/voiceotp.php',[
+                    'otpcode' => $result,
+                    'phone' => $customer->phone
+                ]);
+
+            return response()->json(['otp'=>$result]);
+        }
+
+    }
+
 
     protected function credentials($username, $password)
     {
