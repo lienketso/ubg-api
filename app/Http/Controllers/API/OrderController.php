@@ -148,7 +148,7 @@ class OrderController extends Controller
 
     /**
      * @SWG\Get(
-     *     path="/api/auth/get-order-delivering,
+     *     path="/api/auth/get-order-delivering",
      *     summary="Đơn hàng đang vận chuyển",
      *     tags={"Order"},
      *     description="Lấy ra danh sách đơn hàng đang vận chuyển",
