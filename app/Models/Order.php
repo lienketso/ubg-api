@@ -45,4 +45,8 @@ class Order extends Model
         return $this->hasMany(OrderAddress::class,'order_id');
     }
 
+    public function shipment(){
+
+    }
+
 }

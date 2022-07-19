@@ -178,14 +178,20 @@ class OrderController extends Controller
      * )
      */
     public function getOrderDelivering(Request $request){
-        $shipment = $this->shipmentRepository->with(['order'=>function($e) use($request){
-            return $e->where('user_id',203)->get();
-        }])->findWhere(['status'=>$request->status])->all();
-        $order = [];
-        foreach($shipment as $d){
-            $order[] = $d->order;
+        $user = $request->user();
+        if($user && !is_null($user)){
+            $shipment = $this->shipmentRepository->with(['order'=>function($e) use($request){
+                return $e->where('user_id',203)->get();
+            }])->findWhere(['status'=>$request->status])->all();
+            $order = [];
+            foreach($shipment as $d){
+                $order[] = $d->order;
+            }
+            return response()->json($shipment);
+        }else{
+            return response()->json(['message'=>'Vui long login !']);
         }
-        return response()->json($order);
+
     }
 
     /**
