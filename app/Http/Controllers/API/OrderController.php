@@ -180,15 +180,14 @@ class OrderController extends Controller
     public function getOrderDelivering(Request $request){
         $user = $request->user();
         if($user && !is_null($user)){
-            $shipment = $this->shipmentRepository->with(['order'=>function($e) use($request){
-                return $e->where('user_id',203)->get();
+            $shipment = $this->shipmentRepository->with(['order'=>function($e) use($user){
+                return $e->where('user_id',$user->id)->get();
             }])->findWhere(['status'=>$request->status])->all();
             $order = [];
             foreach($shipment as $d){
                 $order[] = $d->order->toArray();
-                array_filter($order);
             }
-            return response()->json($order);
+            return response()->json(array_filter($order));
         }else{
             return response()->json(['message'=>'Vui long login !']);
         }
