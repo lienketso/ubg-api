@@ -519,12 +519,14 @@ class OrderController extends Controller
         try {
             $cartData = json_decode($request->data);
             $weight = 0;
+            $storeIds = [];
             foreach ($cartData as $d) {
                 $product = $this->productRepository->find($d->product_id);
                 if ($product) {
                     if ($product->weight) {
                         $weight += $product->weight * $d->qty;
                     }
+                    $storeIds[] = $product->store_id;
                 }
             }
             $weight = $weight < 0.1 ? 0.1 : $weight;
@@ -566,24 +568,32 @@ class OrderController extends Controller
                 case 'cod':
                     $paymentData['charge_id'] = Str::upper(Str::random(10));
                     $paymentData['payment_channel'] = $paymentMethod;
-                    $this->paymentRepository->create($paymentData);
+                    $paymentCreate = $this->paymentRepository->create($paymentData);
                     break;
                 case 'bank_transfer':
                     $paymentData['charge_id'] = 'Bank-'.Str::upper(Str::random(10));
                     $paymentData['payment_channel'] = $paymentMethod;
-                    $this->paymentRepository->create($paymentData);
+                    $paymentCreate = $this->paymentRepository->create($paymentData);
                     break;
                 case 'vnpay':
                     $paymentData['charge_id'] = $order->id.'-'.now().'-VNP-'.Str::random(6);
                     $paymentData['payment_channel'] = $paymentMethod;
-                    $this->paymentRepository->create($paymentData);
+                    $paymentCreate = $this->paymentRepository->create($paymentData);
                     break;
                 default:
                     $paymentData['charge_id'] = Str::upper(Str::random(10));
                     $paymentData['payment_channel'] = 'cod';
-                    $this->paymentRepository->create($paymentData);
+                    $paymentCreate = $this->paymentRepository->create($paymentData);
                     break;
             }
+            //update order payment & store
+            $storeIds = array_unique($storeIds);
+            if (count($storeIds) <= 1){
+                $storeIds = implode ("",$storeIds);
+            }
+            $order->store_id = $storeIds;
+            $order->payment_id = $paymentCreate->id;
+            $order->save();
 
             //Trừ số lượng sản phẩm từ trong kho
 
