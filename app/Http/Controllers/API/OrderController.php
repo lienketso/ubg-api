@@ -410,8 +410,8 @@ class OrderController extends Controller
             'coupon_code'     => $couponCode,
             'discount_amount' => $discountAmount,
             'status'          => 'pending',
-            'is_finished'     => false,
-            'is_confirmed'    =>1,
+            'is_finished'     => 1,
+            'is_confirmed'    =>0,
             'affliate_user_id' => $affiliateId,
             'paid_by_ubgxu'  => $paidUbgXuAmount,
             'order_resource'  => 'app'
