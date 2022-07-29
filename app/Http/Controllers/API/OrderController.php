@@ -411,8 +411,10 @@ class OrderController extends Controller
             'discount_amount' => $discountAmount,
             'status'          => 'pending',
             'is_finished'     => false,
+            'is_confirmed'    =>1,
             'affliate_user_id' => $affiliateId,
-            'paid_by_ubgxu'  => $paidUbgXuAmount
+            'paid_by_ubgxu'  => $paidUbgXuAmount,
+            'order_resource'  => 'app'
         ]);
         $order = Order::create($request->input());
         $sessionData['created_order'] = true;

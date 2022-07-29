@@ -35,7 +35,8 @@ class Order extends Model
         'group_buy_order_id',
         'order_province',
         'order_district',
-        'paid_by_ubgxu'
+        'paid_by_ubgxu',
+        'order_resource'
     ];
 
     public function products(){
