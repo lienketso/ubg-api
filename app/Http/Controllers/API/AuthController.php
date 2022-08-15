@@ -153,8 +153,12 @@ class AuthController extends Controller
         //nếu có mã giới thiệu
         if ($request->input('affiliation_id') != null) {
             $presenterUser = $this->customerRepository->findWhere(['affiliation_id' => $request->input('affiliation_id')])->first();
-            $aff = ['presenter_id' => $presenterUser->id];
-            $this->customerRepository->update($aff, $customer->id);
+            if($presenterUser && !empty($presenterUser)){
+                $aff = ['presenter_id' => $presenterUser->id];
+                $this->customerRepository->update($aff, $customer->id);
+            }else{
+                return response()->json(['message'=>'Mã giới thiệu không đúng !']);
+            }
         }
 
 
