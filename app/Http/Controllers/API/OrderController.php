@@ -544,7 +544,17 @@ class OrderController extends Controller
                 $this->orderProductRepository->create($data);
             }
             $sessionData['created_order_product'] = true;
-
+            //create shipment order
+            $ship = [
+                'order_id'=>$order->id,
+                'user_id'=>$currentUserId,
+                'weight'=>$weight,
+                'status'=>'pending',
+                'cod_amount'=>$orderAmount,
+                'cod_status'=>'pending',
+                'price'=>$order->shipping_amount,
+            ];
+            $this->shipmentRepository->create($ship);
             //thanh toán
             $paymentData = [
                 'order_id'=>$order->id,
