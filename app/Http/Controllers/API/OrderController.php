@@ -373,6 +373,20 @@ class OrderController extends Controller
         if(!$currentUserId){
             $currentUserId = 0;
         }
+        $validation = Validator::make($request->all(),[
+            'amount'=>'required',
+            'sub_total'=>'required',
+            'name'=>'required',
+            'phone'=>'required',
+            'data'=>'required',
+            'payment_method'=>'required',
+            'city'=>'required',
+            'state'=>'required',
+            'shipping_amount'=>'required'
+        ]);
+        if($validation->fails()){
+            return response()->json(['error'=>$validation->errors()]);
+        }
         $orderAmount = $request->amount;
         $rawTotal = $request->sub_total;
         $shippingAmount = $request->shipping_amount;
