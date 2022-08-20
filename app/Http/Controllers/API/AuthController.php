@@ -90,9 +90,9 @@ class AuthController extends Controller
 //            ->where('expire_date','>=',now()->toDateString())
 //            ->where('start_date','>=',now()->toDateString())
 //            ->first();
-        if (is_numeric($request->username)) {
+        if ($request->username) {
             $validator = Validator::make($request->all(), [
-                'username' => 'required|numeric|unique:ec_customers,phone',
+                'username' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|unique:ec_customers|min:10',
                 'password' => 'required|string|confirmed|min:6',
             ]);
 
@@ -121,7 +121,6 @@ class AuthController extends Controller
 
             $customer->affiliation_id = intval(1000000 + $customer->id);
 
-
             //call voice OTP
             $generator = "1357902468";
             $result = "";
@@ -139,27 +138,6 @@ class AuthController extends Controller
                     'otpcode' => $otp,
                     'phone' => $customer->phone
                 ]);
-
-
-        } else if (filter_var($request->username, FILTER_VALIDATE_EMAIL)) {
-            $validator = Validator::make($request->all(), [
-                'username' => 'required|email|unique:ec_customers,email',
-                'password' => 'required|string|confirmed|min:6',
-            ]);
-            if ($validator->fails()) {
-                return response()->json($validator->errors());
-            }
-            $customer = Customers::create([
-                'email' => $request->username,
-                'password' => Hash::make($request->password),
-                'name' => 'User default',
-                'register_resource' => 'app',
-                'is_verified' => 1,
-                'status' => 'active'
-            ]);
-
-            $customer->affiliation_id = intval(1000000 + $customer->id);
-            $customer->save();
         }
 
         $token = $customer->createToken('auth_token')->plainTextToken;
