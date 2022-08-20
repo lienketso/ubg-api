@@ -100,11 +100,23 @@ class AuthController extends Controller
                 return response()->json($validator->errors());
             }
 
+            //nếu có mã giới thiệu
+            $presenter = '';
+            if ($request->input('affiliation_id') != null) {
+                $presenterUser = $this->customerRepository->findWhere(['affiliation_id' => $request->input('affiliation_id')])->first();
+                if($presenterUser && !empty($presenterUser)){
+                    $presenter = $presenterUser->id;
+                }else{
+                    return response()->json(['message'=>'Mã giới thiệu không đúng !']);
+                }
+            }
+
             $customer = Customers::create([
                 'phone' => $request->username,
                 'password' => Hash::make($request->password),
                 'name' => 'User default',
-                'register_resource' => 'app'
+                'register_resource' => 'app',
+                'presenter_id'=>$presenter
             ]);
 
             $customer->affiliation_id = intval(1000000 + $customer->id);
@@ -149,18 +161,6 @@ class AuthController extends Controller
             $customer->affiliation_id = intval(1000000 + $customer->id);
             $customer->save();
         }
-
-        //nếu có mã giới thiệu
-        if ($request->input('affiliation_id') != null) {
-            $presenterUser = $this->customerRepository->findWhere(['affiliation_id' => $request->input('affiliation_id')])->first();
-            if($presenterUser && !empty($presenterUser)){
-                $aff = ['presenter_id' => $presenterUser->id];
-                $this->customerRepository->update($aff, $customer->id);
-            }else{
-                return response()->json(['message'=>'Mã giới thiệu không đúng !']);
-            }
-        }
-
 
         $token = $customer->createToken('auth_token')->plainTextToken;
 
