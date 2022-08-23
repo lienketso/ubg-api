@@ -724,8 +724,8 @@ class AuthController extends Controller
         }
         if($user && !empty($user)){
             $addressInfo = $this->addressRepository->findWhere(['id'=>$id,'customer_id'=>$user->id])->first();
-            $addressInfo->update($request->all());
-            return response()->json(['message'=>'Update address success','data'=>$addressInfo]);
+            $update = $this->addressRepository->update($request->all(),$id);
+            return response()->json(['message'=>'Update address success','data'=>$update]);
         }
     }
 
