@@ -728,6 +728,52 @@ class AuthController extends Controller
             return response()->json(['message'=>'Update address success','data'=>$update]);
         }
     }
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/remove-customer-address",
+     *     summary="Xóa địa chỉ người dùng",
+     *     tags={"Users"},
+     *     description="Xóa địa chỉ",
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Parameter(
+     *          name="id",
+     *          in="query",
+     *          type="integer",
+     *          description="Id của địa chỉ",
+     *          required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function removeAddress(Request $request){
+        $user = $request->user();
+        if(!empty($user)){
+            $address = $this->addressRepository->findWhere(['id'=>$request->id,'customer_id'=>$user->id])->first();
+            if($address && !is_null($address)){
+                $remove = $this->addressRepository->delete($request->id);
+                return response()->json(['message'=>'Xóa địa chỉ thành công !','data'=>$remove]);
+            }else{
+                return response()->json(['error'=>'Không tồn tại địa chỉ !']);
+            }
+
+        }else{
+            return response()->json(['error'=>'Không tồn tại người dùng']);
+        }
+
+    }
 
 
     /**

@@ -52,6 +52,7 @@ Route::group([
         Route::get('/confirm-order-received',[\App\Http\Controllers\API\OrderController::class,'ChangeOrderStatus']);
         Route::post('/add-customer-address',[\App\Http\Controllers\API\AuthController::class,'addAddress']);
         Route::post('/update-customer-address',[\App\Http\Controllers\API\AuthController::class,'updateAddress']);
+        Route::get('/remove-customer-address',[\App\Http\Controllers\API\AuthController::class,'removeAddress']);
         Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
         Route::get('/get-order-delivering',[\App\Http\Controllers\API\OrderController::class,'getOrderDelivering']);
     });
