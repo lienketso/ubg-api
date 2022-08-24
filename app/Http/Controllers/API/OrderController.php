@@ -383,6 +383,16 @@ class OrderController extends Controller
             'city'=>'required',
             'state'=>'required',
             'shipping_amount'=>'required'
+        ],[
+            'amount.required'=>'Chưa nhập tổng số tiền đơn hàng',
+            'sub_total.required'=>'Chưa nhập số tiền hàng',
+            'name.required'=>'Vui lòng nhập họ tên',
+            'phone.required'=>'Vui lòng nhập số điện thoại',
+            'data.required'=>'Sản phẩm đơn hàng chưa có',
+            'payment_method.required'=>'Chưa chọn phương thức thanh toán',
+            'city.required'=>'Chưa chọn thành phố',
+            'state.required'=>'Chưa chọn Quận Huyện',
+            'shipping_amount'=>'Chưa có phí ship'
         ]);
         if($validation->fails()){
             return response()->json(['error'=>$validation->errors()]);
