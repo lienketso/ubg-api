@@ -108,7 +108,7 @@ class ProductController extends Controller
     public function searchProduct(Request $request){
         $keyword = $request->keyword;
         $products = $this->productRespository->scopeQuery(function ($q) use ($keyword){
-            return $q->where('name','LIKE','%'.$keyword.'%');
+            return $q->where('name','LIKE','%'.$keyword.'%')->orderBy('price','asc');
         })->paginate(20);
         return response()->json($products);
     }

@@ -390,6 +390,9 @@ class OrderController extends Controller
         $orderAmount = $request->amount;
         $rawTotal = $request->sub_total;
         $shippingAmount = $request->shipping_amount;
+        if($shippingAmount<=0 || is_null($shippingAmount)){
+            $shippingAmount = 25000;
+        }
         $couponCode = $request->coupon_code;
         $discountAmount = $request->discount_amount;
         $paidWithUbgXu = $request->get('ubg_xu_checkout') == 'on';
