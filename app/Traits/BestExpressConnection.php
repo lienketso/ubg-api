@@ -1,26 +1,18 @@
 <?php
-/**
- * BestExpressConnection.php
- * Created by: trainheartnet
- * Created at: 06/01/2022
- * Contact me at: longlengoc90@gmail.com
- */
 
 
-namespace Botble\Ecommerce\Traits;
+namespace App\Traits;
+
 
 use App\Models\StoreLocator;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 
 class BestExpressConnection
 {
     /**
      * @var string
-     * API cus324593 - Best123456
-     * V9Cus404397779 - P654321
      */
     private static $username = 'cus324593';
 
@@ -299,4 +291,6 @@ class BestExpressConnection
 
             });
     }
+
+
 }
