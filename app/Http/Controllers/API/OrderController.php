@@ -1003,8 +1003,8 @@ class OrderController extends Controller
             'ServiceId' => 12491,
             "DestCity"  =>  $request->city,
             "DestDistrict"  => $request->state,
-            "SourceCity" => $defaultStore['city'],
-            "SourceDistrict" => $defaultStore['state'],
+            "SourceCity" => $defaultStore->city,
+            "SourceDistrict" => $defaultStore->state,
             "Weight" => $request->weight,
         ];
         $bestExpressShippingFee = BestExpressConnection::calculateShippingPrice($shippingData);
