@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\OrderAddress;
 use App\Models\OrderHistory;
 use App\Models\StoreLocator;
+use App\Models\Stores;
 use App\Repositories\AddressRepository;
 use App\Repositories\CustomerRepository;
 use App\Repositories\DiscountRepository;
@@ -980,24 +981,20 @@ class OrderController extends Controller
     public function getFeeShipping(Request $request){
 
         $storeLocatorSelected = $request->store_location;
-        $storeLocator = new StoreLocator();
+        $store = new Stores();
         if($storeLocatorSelected == null){
             $customer = $this->usersRepository->find($request->customer_id);
             if(!empty($customer)) {
                 if ($customer->store_locator_id != null) {
-                    $defaultStore = $storeLocator->find($customer->store_locator_id);
+                    $defaultStore = $store->find($customer->store_locator_id);
                 } else {
-                    $defaultStore = $storeLocator->where('is_primary', 1)
-                        ->where('is_shipping_location', 1)
-                        ->first();
+                    $defaultStore = $store->find(9);
                 }
             }else{
-                $defaultStore = $storeLocator->where('is_primary', 1)
-                    ->where('is_shipping_location', 1)
-                    ->first();
+                $defaultStore = $store->find(9);
             }
         }else {
-            $defaultStore = $storeLocator->find($storeLocatorSelected);
+            $defaultStore = $store->find($storeLocatorSelected);
         }
 
         $shippingData = [
