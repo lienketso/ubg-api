@@ -13,12 +13,12 @@ class BestExpressConnection
     /**
      * @var string
      */
-    private static $username = 'V9Cus404397779';
+    private static $username = 'cus324593';
 
     /**
      * @var string
      */
-    private static $password = 'P654321';
+    private static $password = 'Best123456';
 
     /**
      * authen get token
@@ -56,7 +56,7 @@ class BestExpressConnection
             $rawData = [
                 'UserName' => self::$username,
                 'ProductPrice' => floatval($data['ProductPrice']),
-                'COD' => $data['COD'],
+                'COD' => 0,
                 'ServiceId' => 12491,
                 "DestCity"  => $data['DestCity'],
                 "DestDistrict"  => $data['DestDistrict'],
@@ -74,7 +74,7 @@ class BestExpressConnection
 
             $res = Http::withHeaders([
                 'Content-Type' => 'application/json'
-            ])->post('https://ems.vncpost.com/api/Service/EstimateFee', $rawData)
+            ])->post('http://sgp-seaedi.800best.com/VietNamV3/v3/api/process/sears/Service/EstimateFee', $rawData)
                 ->throw(function ($response, $e) {
                     return ['TotalFeeVATWithDiscount' => 0];
                 });
