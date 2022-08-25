@@ -55,6 +55,7 @@ Route::group([
         Route::get('/remove-customer-address',[\App\Http\Controllers\API\AuthController::class,'removeAddress']);
         Route::post('/update-avatar',[\App\Http\Controllers\API\AuthController::class,'updateAvatar']);
         Route::get('/get-order-delivering',[\App\Http\Controllers\API\OrderController::class,'getOrderDelivering']);
+        Route::get('/get-customer-wallet',[\App\Http\Controllers\API\AuthController::class,'getCustomerWallet']);
     });
 });
 /* danh sách đơn hàng của khách hàng */

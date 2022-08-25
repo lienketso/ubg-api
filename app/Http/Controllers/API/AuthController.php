@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\SettingRegister;
 use App\Models\User;
+use App\Models\Wallet;
 use App\Repositories\AddressRepository;
 use App\Repositories\CustomerRepository;
 use App\Repositories\SettingRegisterRepository;
@@ -916,6 +917,39 @@ class AuthController extends Controller
     {
         return response('Success permanent delete ', 200)
             ->header('Content-Type', 'text/plain');
+    }
+    /**
+     * @SWG\Get(
+     *     path="/api/auth/get-customer-wallet",
+     *     summary="Thông tin ví cộng tác viên",
+     *     tags={"Users"},
+     *     description="Chỉ cộng tác viên mới có ví",
+     *     @SWG\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         type="string",
+     *         description="Bearer Auth",
+     *         required=true,
+     *     ),
+     *     @SWG\Response(
+     *         response=200,
+     *         description="OK",
+     *     ),
+     *     @SWG\Response(
+     *         response=422,
+     *         description="Missing Data"
+     *     )
+     * )
+     */
+    public function getCustomerWallet(Request $request){
+        $user = $request->user();
+        $wallet = new Wallet();
+        $infoWallet = $wallet->where('customer_id',$user->id)->first();
+        if(!is_null($infoWallet)){
+            return response()->json($infoWallet);
+        }else{
+            return response()->json(['error'=>'Ví chưa kích hoạt']);
+        }
     }
 
 }
