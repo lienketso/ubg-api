@@ -406,7 +406,7 @@ class OrderController extends Controller
         }
         $couponCode = $request->coupon_code;
         $discountAmount = $request->discount_amount;
-        $paidWithUbgXu = $request->get('ubg_xu_checkout') == 'on';
+        $paidWithUbgXu = $request->ubg_xu_checkout == 'on';
         $paidUbgXuAmount = 0;
 
         if ($paidWithUbgXu) {
