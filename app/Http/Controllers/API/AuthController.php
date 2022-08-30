@@ -613,10 +613,21 @@ class AuthController extends Controller
                 'city'=>$request->city,
                 'ward'=>$request->ward,
                 'address'=>$request->address,
-                'is_default'=>$request->is_default,
+                'is_default' => $request->is_default,
                 'customer_id'=>$user->id
             ];
+            //Nếu thêm mới chọn địa chỉ mặc định => update tất cả địa chỉ cũ về Is_default = 0
+            if($request->is_default == 1){
+
+                $listAddress = $this->addressRepository->findWhere(['customer_id'=>$user->id])->all();
+
+                if($listAddress){
+                    $this->addressRepository->updateOrCreate(['is_default' => 0], ['customer_id' => $user->id]);
+                }
+            }
+
            $addressCreate = $this->addressRepository->create($data);
+
            return response()->json(['message'=>'Create address success','data'=>$addressCreate]);
         }
     }
