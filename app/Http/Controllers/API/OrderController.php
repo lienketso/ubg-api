@@ -412,8 +412,8 @@ class OrderController extends Controller
         if ($paidWithUbgXu) {
             $ubgxu = $request->user()->ubgxu;
             if ($ubgxu >= $orderAmount) {
-                $orderAmount -= $rawTotal;
-                $paidUbgXuAmount = $rawTotal;
+                $orderAmount -= $ubgxu;
+                $paidUbgXuAmount = $request->amount;
             } else {
                 $orderAmount -= $ubgxu;
                 $paidUbgXuAmount = $ubgxu;
@@ -447,6 +447,7 @@ class OrderController extends Controller
         $order = Order::create($request->input());
         $sessionData['created_order'] = true;
         $sessionData['created_order_id'] = $order->id;
+        $sessionData['paid_by_ubgxu'] = $paidUbgXuAmount;
         //Trừ xu trong tài khoản
         if ($paidWithUbgXu) {
             DB::beginTransaction();
