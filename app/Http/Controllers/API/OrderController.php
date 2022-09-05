@@ -412,8 +412,8 @@ class OrderController extends Controller
         if ($paidWithUbgXu) {
             $ubgxu = $request->user()->ubgxu;
             if ($ubgxu >= $orderAmount) {
-                $orderAmount -= $ubgxu;
-                $paidUbgXuAmount = $request->amount;
+                $orderAmount -= $rawTotal;
+                $paidUbgXuAmount = $rawTotal;
             } else {
                 $orderAmount -= $ubgxu;
                 $paidUbgXuAmount = $ubgxu;
@@ -494,7 +494,7 @@ class OrderController extends Controller
 
         if (!empty($discount)) {
             $discount->total_used++;
-            $this->discountRepository->updateOrCreate($discount);
+            $discount->save();
         }
         //lấy ra address từ id
         $address_id = $request->address_id;
