@@ -16,6 +16,7 @@ class OrderAddress extends Model
         'country',
         'state',
         'city',
+        'ward',
         'address',
         'zip_code',
         'order_id'

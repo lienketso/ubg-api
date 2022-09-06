@@ -537,6 +537,7 @@ class OrderController extends Controller
                     'country'  => $address->country,
                     'state'    => $address->state,
                     'city'     => $address->city,
+                    'ward'     => $address->ward,
                     'address'  => $address->address,
                     'zip_code' => $address->zip_code,
                     'order_id' => $order->id,
