@@ -735,6 +735,17 @@ class AuthController extends Controller
             return response()->json(['error'=>$validate->errors()], 401);
         }
         if($user && !empty($user)){
+
+            //Nếu thêm mới chọn địa chỉ mặc định => update tất cả địa chỉ cũ về Is_default = 0
+            if($request->is_default == 1){
+
+                $listAddress = $this->addressRepository->findWhere(['customer_id'=>$user->id])->all();
+
+                if($listAddress){
+                    $this->addressRepository->updateOrCreate(['is_default' => 0], ['customer_id' => $user->id]);
+                }
+            }
+
             $addressInfo = $this->addressRepository->findWhere(['id'=>$id,'customer_id'=>$user->id])->first();
             $update = $this->addressRepository->update($request->all(),$id);
             return response()->json(['message'=>'Update address success','data'=>$update]);
