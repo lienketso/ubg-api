@@ -409,6 +409,32 @@ class OrderController extends Controller
         $paidWithUbgXu = $request->ubg_xu_checkout == 'on';
         $paidUbgXuAmount = 0;
 
+        //trừ đi mã discount nếu có
+        $discount = $this->discountRepository->scopeQuery(function($q) use($couponCode){
+            return $q->where('code',$couponCode )
+                ->where('type','coupon')
+                ->where('start_date','<=',now())
+                ->where(function($query){
+                    return $query->whereNull('end_date')
+                        ->orWhere('end_date','>',now());
+                });
+        })->first();
+        $amount_discount = 0;
+        if (!empty($discount)) {
+            $discount->total_used++;
+            $discount->save();
+
+            if($discount->type_option=='percentage'){
+                $amount_discount = $rawTotal * ($discount->value/100);
+            }else if($discount->type_option=='amount'){
+                $amount_discount = $discount->value;
+            }
+        }
+        $orderAmount -= $amount_discount;
+        $rawTotal -= $amount_discount;
+        $discountAmount += $amount_discount;
+
+
         if ($paidWithUbgXu) {
             $ubgxu = $request->user()->ubgxu;
             if ($ubgxu >= $orderAmount) {
@@ -481,21 +507,7 @@ class OrderController extends Controller
             DB::commit();
         }
 
-        //trừ đi mã discount
-        $discount = $this->discountRepository->scopeQuery(function($q) use($couponCode){
-            return $q->where('code',$couponCode )
-                ->where('type','coupon')
-                ->where('start_date','<=',now())
-                ->where(function($query){
-                    return $query->whereNull('end_date')
-                        ->orWhere('end_date','>',now());
-                });
-        })->first();
 
-        if (!empty($discount)) {
-            $discount->total_used++;
-            $discount->save();
-        }
         //lấy ra address từ id
         $address_id = $request->address_id;
         $sessionData['address_id'] = $address_id;
