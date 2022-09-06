@@ -93,7 +93,7 @@ class AuthController extends Controller
 //            ->first();
         if ($request->username) {
             $validator = Validator::make($request->all(), [
-                'username' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|unique:ec_customers|min:10',
+                'username' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|unique:ec_customers,phone|min:10',
                 'password' => 'required|string|confirmed|min:6',
             ]);
 
