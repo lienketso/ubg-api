@@ -426,12 +426,17 @@ class OrderController extends Controller
 
             if($discount->type_option=='percentage'){
                 $amount_discount = $rawTotal * ($discount->value/100);
-            }else if($discount->type_option=='amount'){
+            }else{
                 $amount_discount = $discount->value;
             }
         }
-        $orderAmount -= $amount_discount;
-        $rawTotal -= $amount_discount;
+        if($amount_discount>=$rawTotal){
+            $rawTotal = 0;
+            $orderAmount -= $request->sub_total;
+        }else{
+            $rawTotal -= $amount_discount;
+            $orderAmount -= $amount_discount;
+        }
         $discountAmount += $amount_discount;
 
 
