@@ -229,7 +229,7 @@ class OrderController extends Controller
     public function getSingleOrder(Request $request){
         $order = Order::where('id',$request->id)
             ->where('user_id',$request->user_id)
-            ->with(['products','address'])->first();
+            ->with(['products','address','payment'])->first();
         foreach ($order->products as $p){
             $single = $this->productRepository->find($p->product_id);
             if($single && $single!=null){
