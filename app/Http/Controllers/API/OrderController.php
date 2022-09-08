@@ -426,8 +426,19 @@ class OrderController extends Controller
 
             if($discount->type_option=='percentage'){
                 $amount_discount = $rawTotal * ($discount->value/100);
-            }else{
+            }
+            if($discount->type_option=='amount' || $discount->type_option=='same-price'){
                 $amount_discount = $discount->value;
+            }
+            if($discount->type_option=='shipping'){
+                $amount_shipping = $discount->value;
+                if($shippingAmount>=$amount_shipping){
+                    $shippingAmount -= $amount_shipping;
+                    $discountAmount += $amount_shipping;
+                    $orderAmount -= $amount_shipping;
+                }else{
+                    $shippingAmount = 0;
+                }
             }
         }
         if($amount_discount>=$rawTotal){
