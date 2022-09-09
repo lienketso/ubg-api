@@ -742,7 +742,11 @@ class AuthController extends Controller
                 $listAddress = $this->addressRepository->findWhere(['customer_id'=>$user->id])->all();
 
                 if($listAddress){
-                    $this->addressRepository->updateOrCreate(['is_default' => 0], ['customer_id' => $user->id]);
+//                    $this->addressRepository->updateOrCreate(['is_default' => 0], ['customer_id' => $user->id]);
+                    foreach($listAddress as $d){
+                        $d->is_default = 0;
+                        $d->save();
+                    }
                 }
             }
 
