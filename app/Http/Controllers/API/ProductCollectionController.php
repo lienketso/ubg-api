@@ -47,7 +47,7 @@ class ProductCollectionController extends Controller
         if($product_collection_id){
             $collection = ProductCollection::where('status','published')->where('id',$product_collection_id)
                 ->with(['products'=>function($query) use($limit){
-                    return $query->where('status','published')
+                    return $query->where('status','published')->where('store_id',9)
                         ->take($limit);
                 }])->get(['id','name','description','status']);
             return response()->json($collection);
